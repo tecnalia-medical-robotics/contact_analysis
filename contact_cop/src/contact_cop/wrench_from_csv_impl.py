@@ -73,23 +73,20 @@ class wrench_from_csvImplementation(object):
         # protected region user configure begin #
         rospy.loginfo("opening file {}".format(config.csv_file))
 
-        file_handler = open(config.csv_file, 'rb')
-
         try:
-            reader = csv.reader(file_handler, delimiter=";")
-            # skip the header
-            next(reader, None)
-            for row in reader:
-                row_array = numpy.asarray(row)
-                row_array[row_array == ''] = '0'
-                rospy.loginfo("Read: {}".format(row_array))
+            with open(config.csv_file, 'rb') as file_handler:
+                reader = csv.reader(file_handler, delimiter=";")
+                # skip the header
+                next(reader, None)
+                for row in reader:
+                    row_array = numpy.asarray(row)
+                    row_array[row_array == ''] = '0'
+                    rospy.loginfo("Read: {}".format(row_array))
 
         except IOError as error:
             rospy.logerr("Prb while loading file")
             rospy.logerr("Error: {}".format(error))
             return False
-        finally:
-            file_handler.close()
 
         # protected region user configure end #
         return True
