@@ -23,6 +23,11 @@ class contact_cop_studyConfig(object):
     def __init__(self):
         pass
 
+    def __str__(self):
+        msg = "Instance of contact_cop_studyConfig class: {"
+        msg += "}"
+        return msg
+
 class contact_cop_studyData(object):
     """
     set of input / output handled through the update methods

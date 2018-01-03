@@ -46,7 +46,7 @@ class roswrench_from_csv(object):
         """
         function setting the initial configuration of the node
         """
-        self.component_implementation_.configure(self.component_config_)
+        return self.component_implementation_.configure(self.component_config_)
 
     # todo: this may need to be handled as well
     def activate_all_output(self):
@@ -68,8 +68,12 @@ class roswrench_from_csv(object):
 
         self.component_implementation_.update(self.component_data_, self.component_config_)
 
-        if self.component_data_.out_wrench_active:
-            self.wrench_.publish(self.component_data_.out_wrench)
+        try:
+            if self.component_data_.out_wrench_active:
+                self.wrench_.publish(self.component_data_.out_wrench)
+        except rospy.ROSException as error:
+            rospy.logerr("Exception: {}".format(error))
+
 
 def main():
     """
@@ -80,7 +84,11 @@ def main():
     rospy.init_node("wrench_from_csv", anonymous=True)
 
     node = roswrench_from_csv()
-    node.configure()
+    if not node.configure():
+        rospy.logfatal("Could not configure the node")
+        rospy.logfatal("Please check configuration parameters")
+        rospy.logfatal("{}".format(node.component_config_))
+        return
 
     rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
     rospy.spin()

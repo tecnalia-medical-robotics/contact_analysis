@@ -26,6 +26,12 @@ class wrench_from_csvConfig(object):
         self.csv_file = "Undef"
         pass
 
+    def __str__(self):
+        msg = "Instance of wrench_from_csvConfig class: {"
+        msg += "csv_file: {} ".format(self.csv_file)
+        msg += "}"
+        return msg
+
 class wrench_from_csvData(object):
     """
     set of input / output handled through the update methods
@@ -60,7 +66,10 @@ class wrench_from_csvImplementation(object):
         self.passthrough = wrench_from_csvPassthrough()
 
         # protected region user member variables begin #
-        self.wrenches = WrenchStamped()
+        # list of wrenches read
+        self.wrenches = list()
+        # id of the last wrench published
+        self.id_wrench = -1
         # protected region user member variables end #
 
     def configure(self, config):
@@ -73,6 +82,7 @@ class wrench_from_csvImplementation(object):
         # protected region user configure begin #
         rospy.loginfo("opening file {}".format(config.csv_file))
 
+
         try:
             with open(config.csv_file, 'rb') as file_handler:
                 reader = csv.reader(file_handler, delimiter=";")
@@ -81,12 +91,26 @@ class wrench_from_csvImplementation(object):
                 for row in reader:
                     row_array = numpy.asarray(row)
                     row_array[row_array == ''] = '0'
-                    rospy.loginfo("Read: {}".format(row_array))
+                    data = row_array[13:19]
+
+                    wrench_stamped = WrenchStamped()
+                    wrench_stamped.header.frame_id = "force_sensor"
+
+                    # rospy.loginfo("Read: {}".format(data))
+                    wrench_stamped.wrench.force.x = float(data[0])
+                    wrench_stamped.wrench.force.y = float(data[1])
+                    wrench_stamped.wrench.force.z = float(data[2])
+                    wrench_stamped.wrench.torque.x = float(data[3])
+                    wrench_stamped.wrench.torque.y = float(data[4])
+                    wrench_stamped.wrench.torque.z = float(data[5])
+                    self.wrenches.append(wrench_stamped)
 
         except IOError as error:
             rospy.logerr("Prb while loading file")
             rospy.logerr("Error: {}".format(error))
             return False
+
+        rospy.loginfo("Loaded {} wrenches".format(len(self.wrenches)))
 
         # protected region user configure end #
         return True
@@ -103,6 +127,15 @@ class wrench_from_csvImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        self.id_wrench += 1
+        if self.id_wrench >= len(self.wrenches):
+            rospy.loginfo("Published all wrenches, looping at next iteration")
+            self.id_wrench = -1
+            data.out_wrench_active = False
+            return
+        wrench = self.wrenches[self.id_wrench]
+        wrench.header.stamp = rospy.get_rostime()
+        data.out_wrench = wrench
         # protected region user update end #
         pass
 
