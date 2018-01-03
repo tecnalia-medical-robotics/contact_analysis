@@ -27,6 +27,10 @@ Update frequency: 1000 Hz.
 <!--- protected region wrench_from_csv end -->
 
 ## Dynamic Parameters
+All dynamic parameters can be set through the command line:
+```
+rosrun contact_cop wrench_from_csv _[param_name]:=[new_value]
+```
 `csv_file` *(std::string, default: "Undef")*
 <!--- protected region csv_file begin -->
 <!--- protected region csv_file end -->

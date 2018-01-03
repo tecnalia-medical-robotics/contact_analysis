@@ -63,9 +63,6 @@ class roscontact_cop_study(object):
 
         self.component_implementation_.update(self.component_data_, self.component_config_)
 
-        try:
-        except rospy.ROSException as error:
-            rospy.logerr("Exception: {}".format(error))
 
 
 def main():
