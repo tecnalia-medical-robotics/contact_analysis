@@ -11,6 +11,7 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import WrenchStamped
+from plot_tool.srv import PlotPose, PlotPoseRequest
 # todo do not need both of them
 
 # protected region user include files begin #
@@ -49,6 +50,7 @@ class contact_cop_studyPassthrough(object):
     def __init__(self):
         """ Class to contain variable breaking the interface separation
         """
+        self.client_display = None
         pass
 
 class contact_cop_studyImplementation(object):
@@ -80,6 +82,7 @@ class contact_cop_studyImplementation(object):
         # protected region user configure begin #
         # protected region user configure end #
         return True
+
 
     def update(self, data, config):
         """
@@ -139,6 +142,8 @@ class contact_cop_studyImplementation(object):
             a_x = - torque[1] / force[2]
             a_y = torque[0] / force[2]
 
+            self.generate_plot_request(a_x, a_y)
+
         else:
             rospy.logwarn("Force too low: {}".format(force_norm))
 
@@ -147,29 +152,15 @@ class contact_cop_studyImplementation(object):
 
     # protected region user additional functions begin #
 
-    def update_plot(self):
-        if not self.wrenches:
-            print "no data"
-            return self.line,
 
-        cop = []
+    def generate_plot_request(self, x, y):
 
-        force  = [[f.wrench.force.x, f.wrench.force.y, f.wrench.force.z] for f in self.wrenches]
-        torque  = [[f.wrench.torque.x, f.wrench.torque.y, f.wrench.torque.z] for f in self.wrenches]
-
-        for iforce, itorque in zip(force, torque):
-            force_norm = numpy.linalg.norm(iforce)
-
-            if force_norm > 1.0:
-                a_x = - itorque[1] / iforce[2]
-                a_y = itorque[0] / iforce[2]
-                cop.append([a_x, a_y])
-
-        if not cop:
-            return
-        cop_array = numpy.asarray(cop)
-        self.ax.plot(cop_array[:, 0], cop_array[:, 1])
-        plt.show(block=False)
+        request = PlotPoseRequest()
+        request.msg.position.x = x
+        request.msg.position.y = y
+        request.append = True
+        request.symbol = ord('o')
+        request.symbol_size = 10
+        self.passthrough.client_display(request)
 
     # protected region user additional functions end #
-

@@ -20,6 +20,11 @@ Update frequency: 1000 Hz.
 <!--- protected region wrench begin -->
 <!--- protected region wrench end -->
 
+## Services used
+`display` *(plot_tool::PlotPose)*
+<!--- protected region service client display begin -->
+<!--- protected region service client display end -->
+
 # Node: wrench_from_csv
 Update frequency: 1000 Hz.
 

@@ -5,6 +5,7 @@
     license="https://www.gnu.org/licenses/gpl.txt">
     <node name="contact_cop_study" frequency="1000">
         <subscriber name="wrench" type="geometry_msgs::WrenchStamped"/>
+        <serviceClient name="display" type="plot_tool::PlotPose"/>
     </node>
     <node name="wrench_from_csv" frequency="1000">
         <publisher name="wrench" type="geometry_msgs::WrenchStamped"/>
