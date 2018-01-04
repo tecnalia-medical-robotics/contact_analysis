@@ -11,6 +11,7 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import WrenchStamped
+from std_msgs.msg import Bool
 # todo do not need both of them
 
 # protected region user include files begin #
@@ -44,6 +45,8 @@ class wrench_from_csvData(object):
         # output data
         self.out_wrench = WrenchStamped()
         self.out_wrench_active = bool()
+        self.out_loop = Bool()
+        self.out_loop_active = bool()
         pass
 
 class wrench_from_csvPassthrough(object):
@@ -69,7 +72,8 @@ class wrench_from_csvImplementation(object):
         # list of wrenches read
         self.wrenches = list()
         # id of the last wrench published
-        self.id_wrench = -1
+        # self.id_wrench = -1
+        self.id_wrench = 5000
         # protected region user member variables end #
 
     def configure(self, config):
@@ -130,7 +134,8 @@ class wrench_from_csvImplementation(object):
         self.id_wrench += 1
         if self.id_wrench >= len(self.wrenches):
             rospy.loginfo("Published all wrenches, looping at next iteration")
-            self.id_wrench = -1
+            #self.id_wrench = -1
+            self.id_wrench = 5000
             data.out_wrench_active = False
             return
         wrench = self.wrenches[self.id_wrench]

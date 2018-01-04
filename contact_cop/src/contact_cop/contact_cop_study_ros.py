@@ -13,6 +13,7 @@ import rospy
 
 # ROS message & services includes
 from geometry_msgs.msg import WrenchStamped
+from std_msgs.msg import Bool
 from plot_tool.srv import PlotPose
 
 # other includes
@@ -32,6 +33,7 @@ class roscontact_cop_study(object):
         self.component_implementation_ = contact_cop_study_impl.contact_cop_studyImplementation()
 
         self.wrench_ = rospy.Subscriber('wrench', WrenchStamped, self.topic_callback_wrench)
+        self.loop_ = rospy.Subscriber('loop', Bool, self.topic_callback_loop)
         # to enable service name adjustment when loading the node
         remap = rospy.get_param("~display_remap", "display")
         self.component_implementation_.passthrough.client_display = rospy.ServiceProxy(remap, PlotPose);
@@ -41,6 +43,12 @@ class roscontact_cop_study(object):
         callback called at message reception
         """
         self.component_data_.in_wrench = msg
+
+    def topic_callback_loop(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_loop = msg
 
     def configure(self):
         """
@@ -84,5 +92,5 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 500), node.update)
     rospy.spin()

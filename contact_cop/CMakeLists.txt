@@ -7,8 +7,9 @@ project(contact_cop)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
-  dynamic_reconfigure
+  std_msgs
   plot_tool
+  dynamic_reconfigure
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -52,8 +53,9 @@ catkin_package(
   CATKIN_DEPENDS
     rospy
     geometry_msgs
-    dynamic_reconfigure
+    std_msgs
     plot_tool
+    dynamic_reconfigure
 )
 
 ###########

@@ -15,6 +15,7 @@ from contact_cop.cfg import wrench_from_csvConfig
 
 # ROS message & services includes
 from geometry_msgs.msg import WrenchStamped
+from std_msgs.msg import Bool
 
 # other includes
 from contact_cop import wrench_from_csv_impl
@@ -34,6 +35,7 @@ class roswrench_from_csv(object):
 
         srv = Server(wrench_from_csvConfig, self.configure_callback)
         self.wrench_ = rospy.Publisher('wrench', WrenchStamped, queue_size=1)
+        self.loop_ = rospy.Publisher('loop', Bool, queue_size=1)
 
     def configure_callback(self, config, level):
         """
@@ -54,6 +56,7 @@ class roswrench_from_csv(object):
         activate all defined output
         """
         self.component_data_.out_wrench_active = True
+        self.component_data_.out_loop_active = True
 
     def update(self, event):
         """
@@ -71,6 +74,8 @@ class roswrench_from_csv(object):
         try:
             if self.component_data_.out_wrench_active:
                 self.wrench_.publish(self.component_data_.out_wrench)
+            if self.component_data_.out_loop_active:
+                self.loop_.publish(self.component_data_.out_loop)
         except rospy.ROSException as error:
             rospy.logerr("Exception: {}".format(error))
 
@@ -90,5 +95,5 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 200), node.update)
     rospy.spin()

@@ -10,7 +10,7 @@ Analysis of the Center of Pressure related to contact points
 <!--- <img src="./model/wrench_from_csv.png" width="300px" />-->
 
 # Node: contact_cop_study
-Update frequency: 1000 Hz.
+Update frequency: 500 Hz.
 
 <!--- protected region contact_cop_study begin -->
 <!--- protected region contact_cop_study end -->
@@ -19,6 +19,9 @@ Update frequency: 1000 Hz.
 `wrench` *(geometry_msgs::WrenchStamped)*
 <!--- protected region wrench begin -->
 <!--- protected region wrench end -->
+`loop` *(std_msgs::Bool)*
+<!--- protected region loop begin -->
+<!--- protected region loop end -->
 
 ## Services used
 `display` *(plot_tool::PlotPose)*
@@ -26,7 +29,7 @@ Update frequency: 1000 Hz.
 <!--- protected region service client display end -->
 
 # Node: wrench_from_csv
-Update frequency: 1000 Hz.
+Update frequency: 200 Hz.
 
 <!--- protected region wrench_from_csv begin -->
 <!--- protected region wrench_from_csv end -->
@@ -44,4 +47,7 @@ rosrun contact_cop wrench_from_csv _[param_name]:=[new_value]
 `wrench` *(geometry_msgs::WrenchStamped)*
 <!--- protected region wrench begin -->
 <!--- protected region wrench end -->
+`loop` *(std_msgs::Bool)*
+<!--- protected region loop begin -->
+<!--- protected region loop end -->
 
