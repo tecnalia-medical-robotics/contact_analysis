@@ -3,12 +3,12 @@
     author_email="anthony.remazeilles@tecnalia.com"
     description="Analysis of the Center of Pressure related to contact points"
     license="https://www.gnu.org/licenses/gpl.txt">
-    <node name="contact_cop_study" frequency="500">
+    <node name="contact_cop_study" frequency="50">
         <subscriber name="wrench" type="geometry_msgs::WrenchStamped"/>
         <subscriber name="loop" type="std_msgs::Bool"/>
         <serviceClient name="display" type="plot_tool::PlotPose"/>
     </node>
-    <node name="wrench_from_csv" frequency="200">
+    <node name="wrench_from_csv" frequency="20">
         <publisher name="wrench" type="geometry_msgs::WrenchStamped"/>
         <publisher name="loop" type="std_msgs::Bool"/>
         <parameter name="csv_file" type="std::string" value="Undef"/>

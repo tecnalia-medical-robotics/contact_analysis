@@ -18,6 +18,7 @@ from plot_tool.srv import PlotPose
 
 # other includes
 from contact_cop import contact_cop_study_impl
+from copy import deepcopy
 
 # todo set a function to write correctly the name
 class roscontact_cop_study(object):
@@ -43,12 +44,14 @@ class roscontact_cop_study(object):
         callback called at message reception
         """
         self.component_data_.in_wrench = msg
+        self.component_data_.in_wrench_updated = True
 
     def topic_callback_loop(self, msg):
         """
         callback called at message reception
         """
         self.component_data_.in_loop = msg
+        self.component_data_.in_loop_updated = True
 
     def configure(self):
         """
@@ -56,11 +59,19 @@ class roscontact_cop_study(object):
         """
         return self.component_implementation_.configure(self.component_config_)
 
-    # todo: this may need to be handled as well
     def activate_all_output(self):
         """
         activate all defined output
         """
+        pass
+
+    def set_all_output_read(self):
+        """
+        set related flag to state that input has been read
+        """
+        self.component_data_.in_wrench_updated = False
+        self.component_data_.in_loop_updated = False
+        pass
 
     def update(self, event):
         """
@@ -72,8 +83,10 @@ class roscontact_cop_study(object):
         @return { description_of_the_return_value }
         """
         self.activate_all_output()
-
-        self.component_implementation_.update(self.component_data_, self.component_config_)
+        config = deepcopy(self.component_config_)
+        data = deepcopy(self.component_data_)
+        self.set_all_output_read()
+        self.component_implementation_.update(data, config)
 
 
 
@@ -92,5 +105,5 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 500), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 50), node.update)
     rospy.spin()

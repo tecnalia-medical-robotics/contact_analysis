@@ -10,7 +10,7 @@ Analysis of the Center of Pressure related to contact points
 <!--- <img src="./model/wrench_from_csv.png" width="300px" />-->
 
 # Node: contact_cop_study
-Update frequency: 500 Hz.
+Update frequency: 50 Hz.
 
 <!--- protected region contact_cop_study begin -->
 <!--- protected region contact_cop_study end -->
@@ -29,7 +29,7 @@ Update frequency: 500 Hz.
 <!--- protected region service client display end -->
 
 # Node: wrench_from_csv
-Update frequency: 200 Hz.
+Update frequency: 20 Hz.
 
 <!--- protected region wrench_from_csv begin -->
 <!--- protected region wrench_from_csv end -->

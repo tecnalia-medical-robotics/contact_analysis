@@ -73,7 +73,7 @@ class wrench_from_csvImplementation(object):
         self.wrenches = list()
         # id of the last wrench published
         # self.id_wrench = -1
-        self.id_wrench = 5000
+        self.id_wrench = 5500
         # protected region user member variables end #
 
     def configure(self, config):
@@ -132,11 +132,14 @@ class wrench_from_csvImplementation(object):
         """
         # protected region user update begin #
         self.id_wrench += 1
+        data.out_loop_active = False
         if self.id_wrench >= len(self.wrenches):
             rospy.loginfo("Published all wrenches, looping at next iteration")
             #self.id_wrench = -1
-            self.id_wrench = 5000
+            self.id_wrench = 5500
             data.out_wrench_active = False
+            data.out_loop = True
+            data.out_loop_active = True
             return
         wrench = self.wrenches[self.id_wrench]
         wrench.header.stamp = rospy.get_rostime()

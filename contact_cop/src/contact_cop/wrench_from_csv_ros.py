@@ -19,6 +19,7 @@ from std_msgs.msg import Bool
 
 # other includes
 from contact_cop import wrench_from_csv_impl
+from copy import deepcopy
 
 # todo set a function to write correctly the name
 class roswrench_from_csv(object):
@@ -50,13 +51,19 @@ class roswrench_from_csv(object):
         """
         return self.component_implementation_.configure(self.component_config_)
 
-    # todo: this may need to be handled as well
     def activate_all_output(self):
         """
         activate all defined output
         """
         self.component_data_.out_wrench_active = True
         self.component_data_.out_loop_active = True
+        pass
+
+    def set_all_output_read(self):
+        """
+        set related flag to state that input has been read
+        """
+        pass
 
     def update(self, event):
         """
@@ -68,12 +75,18 @@ class roswrench_from_csv(object):
         @return { description_of_the_return_value }
         """
         self.activate_all_output()
-
-        self.component_implementation_.update(self.component_data_, self.component_config_)
+        config = deepcopy(self.component_config_)
+        data = deepcopy(self.component_data_)
+        self.set_all_output_read()
+        self.component_implementation_.update(data, config)
 
         try:
+            self.component_data_.out_wrench_active = data.out_wrench_active
+            self.component_data_.out_wrench = data.out_wrench
             if self.component_data_.out_wrench_active:
                 self.wrench_.publish(self.component_data_.out_wrench)
+            self.component_data_.out_loop_active = data.out_loop_active
+            self.component_data_.out_loop = data.out_loop
             if self.component_data_.out_loop_active:
                 self.loop_.publish(self.component_data_.out_loop)
         except rospy.ROSException as error:
@@ -95,5 +108,5 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 200), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 20), node.update)
     rospy.spin()
