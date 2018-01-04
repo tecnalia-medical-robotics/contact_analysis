@@ -14,6 +14,7 @@ from geometry_msgs.msg import WrenchStamped
 # todo do not need both of them
 
 # protected region user include files begin #
+import numpy
 # protected region user include files end #
 
 class contact_cop_studyConfig(object):
@@ -61,6 +62,12 @@ class contact_cop_studyImplementation(object):
         self.passthrough = contact_cop_studyPassthrough()
 
         # protected region user member variables begin #
+        # accumulated wrenches
+        self.wrenches = list()
+        # number of updates without receiving any data
+        self.waiting_iteration = 0
+        # number of cycle
+        self.cycle_id = 0
         # protected region user member variables end #
 
     def configure(self, config):
@@ -74,7 +81,6 @@ class contact_cop_studyImplementation(object):
         # protected region user configure end #
         return True
 
-
     def update(self, data, config):
         """
         @brief { function_description }
@@ -86,9 +92,84 @@ class contact_cop_studyImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        # todo: check the timestamps to see if the information has been updated
+
+        # print "processing wrench: \n {}".format(data.in_wrench)
+        # print "timestamp: \n {}".format(data.in_wrench.header.stamp)
+        # print "Check: {}".format(type(data.in_wrench.header.stamp))
+        # print "Check: {}".format(rospy.Time(0))
+
+        self.cycle_id += 1
+
+        if data.in_wrench.header.stamp == rospy.Time(0):
+            self.waiting_iteration += 1
+
+            if self.waiting_iteration %50 == 0:
+                print "No data received since {} cycles".format(self.waiting_iteration)
+            return
+
+        if self.waiting_iteration != 0:
+            print "Resuming recepttion after {} cycles".format(self.waiting_iteration)
+            self.waiting_iteration = 0
+
+        if not self.wrenches:
+            self.wrenches.append(data.in_wrench)
+        else:
+            last_stamp = self.wrenches[-1].header.stamp
+            current_stamp = data.in_wrench.header.stamp
+
+            if last_stamp == current_stamp:
+                rospy.loginfo("[cycle {}] wrench not updated: {} vs {}".format(self.cycle_id,last_stamp, current_stamp))
+            else:
+                self.wrenches.append(data.in_wrench)
+
+        # we currently limit the data storage to the N latest values received
+        nmax = 100
+        while len(self.wrenches) > nmax:
+            del self.wrenches[0]
+
+        ## generate the output
+        wrench = data.in_wrench.wrench
+        force = [wrench.force.x, wrench.force.y, wrench.force.z]
+        torque = [wrench.torque.x, wrench.torque.y, wrench.torque.z]
+
+        force_norm = numpy.linalg.norm(force)
+
+        if force_norm > 1.0:
+            a_x = - torque[1] / force[2]
+            a_y = torque[0] / force[2]
+
+        else:
+            rospy.logwarn("Force too low: {}".format(force_norm))
+
         # protected region user update end #
         pass
 
     # protected region user additional functions begin #
+
+    def update_plot(self):
+        if not self.wrenches:
+            print "no data"
+            return self.line,
+
+        cop = []
+
+        force  = [[f.wrench.force.x, f.wrench.force.y, f.wrench.force.z] for f in self.wrenches]
+        torque  = [[f.wrench.torque.x, f.wrench.torque.y, f.wrench.torque.z] for f in self.wrenches]
+
+        for iforce, itorque in zip(force, torque):
+            force_norm = numpy.linalg.norm(iforce)
+
+            if force_norm > 1.0:
+                a_x = - itorque[1] / iforce[2]
+                a_y = itorque[0] / iforce[2]
+                cop.append([a_x, a_y])
+
+        if not cop:
+            return
+        cop_array = numpy.asarray(cop)
+        self.ax.plot(cop_array[:, 0], cop_array[:, 1])
+        plt.show(block=False)
+
     # protected region user additional functions end #
 
