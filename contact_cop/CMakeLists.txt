@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
   dynamic_reconfigure
+  visualization_msgs
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -52,6 +53,7 @@ catkin_package(
     rospy
     geometry_msgs
     dynamic_reconfigure
+    visualization_msgs
 )
 
 ###########

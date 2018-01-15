@@ -10,12 +10,17 @@ https://www.gnu.org/licenses/gpl.txt
 """
 
 import rospy
+from dynamic_reconfigure.server import Server
+from contact_cop.cfg import contact_cop_studyConfig
 
 # ROS message & services includes
+from geometry_msgs.msg import Point
+from visualization_msgs.msg import Marker
 from geometry_msgs.msg import WrenchStamped
 
 # other includes
 from contact_cop import contact_cop_study_impl
+from copy import deepcopy
 
 # todo set a function to write correctly the name
 class roscontact_cop_study(object):
@@ -30,6 +35,9 @@ class roscontact_cop_study(object):
         self.component_config_ = contact_cop_study_impl.contact_cop_studyConfig()
         self.component_implementation_ = contact_cop_study_impl.contact_cop_studyImplementation()
 
+        srv = Server(contact_cop_studyConfig, self.configure_callback)
+        self.cop_ = rospy.Publisher('cop', Point, queue_size=1)
+        self.marker_cop_ = rospy.Publisher('marker_cop', Marker, queue_size=1)
         self.wrench_ = rospy.Subscriber('wrench', WrenchStamped, self.topic_callback_wrench)
 
     def topic_callback_wrench(self, msg):
@@ -37,6 +45,14 @@ class roscontact_cop_study(object):
         callback called at message reception
         """
         self.component_data_.in_wrench = msg
+        self.component_data_.in_wrench_updated = True
+
+    def configure_callback(self, config, level):
+        """
+        callback on the change of parameters dynamically adjustable
+        """
+        self.component_config_.force_th = config.force_th
+        return config
 
     def configure(self):
         """
@@ -44,11 +60,20 @@ class roscontact_cop_study(object):
         """
         return self.component_implementation_.configure(self.component_config_)
 
-    # todo: this may need to be handled as well
     def activate_all_output(self):
         """
         activate all defined output
         """
+        self.component_data_.out_cop_active = True
+        self.component_data_.out_marker_cop_active = True
+        pass
+
+    def set_all_output_read(self):
+        """
+        set related flag to state that input has been read
+        """
+        self.component_data_.in_wrench_updated = False
+        pass
 
     def update(self, event):
         """
@@ -60,9 +85,22 @@ class roscontact_cop_study(object):
         @return { description_of_the_return_value }
         """
         self.activate_all_output()
+        config = deepcopy(self.component_config_)
+        data = deepcopy(self.component_data_)
+        self.set_all_output_read()
+        self.component_implementation_.update(data, config)
 
-        self.component_implementation_.update(self.component_data_, self.component_config_)
-
+        try:
+            self.component_data_.out_cop_active = data.out_cop_active
+            self.component_data_.out_cop = data.out_cop
+            if self.component_data_.out_cop_active:
+                self.cop_.publish(self.component_data_.out_cop)
+            self.component_data_.out_marker_cop_active = data.out_marker_cop_active
+            self.component_data_.out_marker_cop = data.out_marker_cop
+            if self.component_data_.out_marker_cop_active:
+                self.marker_cop_.publish(self.component_data_.out_marker_cop)
+        except rospy.ROSException as error:
+            rospy.logerr("Exception: {}".format(error))
 
 
 def main():
@@ -80,5 +118,5 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 100), node.update)
     rospy.spin()

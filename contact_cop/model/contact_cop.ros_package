@@ -3,12 +3,21 @@
     author_email="anthony.remazeilles@tecnalia.com"
     description="Analysis of the Center of Pressure related to contact points"
     license="https://www.gnu.org/licenses/gpl.txt">
-    <node name="contact_cop_study" frequency="1000">
-        <subscriber name="wrench" type="geometry_msgs::WrenchStamped"/>
+    <node name="contact_cop_study" frequency="100">
+        <subscriber name="wrench" type="geometry_msgs::WrenchStamped"
+            description="Wrench measured by a sensor"/>
+        <publisher name="cop" type="geometry_msgs::Point"
+            description="Computed Center of Pressure"/>
+        <publisher name="marker_cop" type="visualization_msgs::Marker"
+            description="Marker for rviz at the computed COP"/>
+        <parameter name="force_th" type="double" value="1.0"
+            description="minmum force norm to compute COP"/>
     </node>
     <node name="wrench_from_csv" frequency="1000">
-        <publisher name="wrench" type="geometry_msgs::WrenchStamped"/>
-        <parameter name="csv_file" type="std::string" value="Undef"/>
+        <publisher name="wrench" type="geometry_msgs::WrenchStamped"
+            description="emulated wrench measure"/>
+        <parameter name="csv_file" type="std::string" value="Undef"
+            description="csv file containing wrench information to publish"/>
     </node>
 <depend>geometry_msgs</depend>
 </package>

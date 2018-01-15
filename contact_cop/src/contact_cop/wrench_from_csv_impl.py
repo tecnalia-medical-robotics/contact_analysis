@@ -46,6 +46,13 @@ class wrench_from_csvData(object):
         self.out_wrench_active = bool()
         pass
 
+    def __str__(self):
+        msg = "Instance of wrench_from_csvData class: \n {"
+        msg += "out_wrench: {} \n".format(self.out_wrench_active)
+        msg += "out_wrench_active: {} \n".format(self.out_wrench_active)
+        msg += "}"
+        return msg
+
 class wrench_from_csvPassthrough(object):
     """
     set of passthrough elements slightly violating interface / implementation separation
@@ -91,7 +98,9 @@ class wrench_from_csvImplementation(object):
                 for row in reader:
                     row_array = numpy.asarray(row)
                     row_array[row_array == ''] = '0'
-                    data = row_array[13:19]
+                    # todo: set it as a configuration parameter
+                    # data = row_array[13:19]
+                    data = row_array[0:6]
 
                     wrench_stamped = WrenchStamped()
                     wrench_stamped.header.frame_id = "force_sensor"
@@ -141,4 +150,3 @@ class wrench_from_csvImplementation(object):
 
     # protected region user additional functions begin #
     # protected region user additional functions end #
-
