@@ -4,6 +4,12 @@ contact_cop
 # General description of the package
 Analysis of the Center of Pressure related to contact points
 <!--- protected region package descripion begin -->
+
+To launch the csv interpretor:
+```
+rosrun contact_cop wrench_from_csv _csv_file:=/home/anthony/tmp/sarafun_data/ibd_v2/insertion_by_deformation_annotated_data/data01_split/wrench_0.csv _inc:=5
+```
+
 <!--- protected region package descripion end -->
 
 <!--- todo How to handle the image generation -->
@@ -51,6 +57,9 @@ rosrun contact_cop wrench_from_csv _[param_name]:=[new_value]
 `csv_file` *(std::string, default: "Undef")*
 <!--- protected region csv_file begin -->
 <!--- protected region csv_file end -->
+`inc` *(int, default: 1)*
+<!--- protected region inc begin -->
+<!--- protected region inc end -->
 
 ## Published Topics
 `wrench` *(geometry_msgs::WrenchStamped)*

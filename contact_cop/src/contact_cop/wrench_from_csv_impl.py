@@ -24,11 +24,13 @@ class wrench_from_csvConfig(object):
     """
     def __init__(self):
         self.csv_file = "Undef"
+        self.inc = 1
         pass
 
     def __str__(self):
         msg = "Instance of wrench_from_csvConfig class: {"
         msg += "csv_file: {} ".format(self.csv_file)
+        msg += "inc: {} ".format(self.inc)
         msg += "}"
         return msg
 
@@ -136,10 +138,11 @@ class wrench_from_csvImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-        self.id_wrench += 1
+        rospy.loginfo("Check : inc is {} ".format(config.inc))
+        self.id_wrench += config.inc
         if self.id_wrench >= len(self.wrenches):
             rospy.loginfo("Published all wrenches, looping at next iteration")
-            self.id_wrench = -1
+            self.id_wrench = - config.inc
             data.out_wrench_active = False
             return
         wrench = self.wrenches[self.id_wrench]

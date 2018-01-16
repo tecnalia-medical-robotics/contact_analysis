@@ -41,6 +41,7 @@ class roswrench_from_csv(object):
         callback on the change of parameters dynamically adjustable
         """
         self.component_config_.csv_file = config.csv_file
+        self.component_config_.inc = config.inc
         return config
 
     def configure(self):

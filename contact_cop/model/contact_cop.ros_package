@@ -18,6 +18,8 @@
             description="emulated wrench measure"/>
         <parameter name="csv_file" type="std::string" value="Undef"
             description="csv file containing wrench information to publish"/>
+        <parameter name="inc" type="int" value="1"
+            description="csv file containing wrench information to publish"/>
     </node>
 <depend>geometry_msgs</depend>
 </package>
