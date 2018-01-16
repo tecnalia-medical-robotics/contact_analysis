@@ -11,12 +11,13 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import Point
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import WrenchStamped
 # todo do not need both of them
 
 # protected region user include files begin #
 import numpy
+from visualization_msgs.msg import Marker
 # protected region user include files end #
 
 class contact_cop_studyConfig(object):
@@ -48,7 +49,7 @@ class contact_cop_studyData(object):
         # output data
         self.out_cop = Point()
         self.out_cop_active = bool()
-        self.out_marker_cop = Marker()
+        self.out_marker_cop = MarkerArray()
         self.out_marker_cop_active = bool()
         pass
 
@@ -83,25 +84,42 @@ class contact_cop_studyImplementation(object):
         self.passthrough = contact_cop_studyPassthrough()
 
         # protected region user member variables begin #
-        self.marker = Marker()
+        self.marker = create_marker_point("cop", "cop_frame")
+        self.history_length = 10
+
+        cur_id = 2
+        cur_a = 1 - 1.0 / self.history_length
+
+        self.markers = list()
+
+        for i in range(self.history_length):
+            marker = create_marker_point("cop", "cop_frame")
+            marker.color.a = cur_a
+            marker.id = cur_id
+            self.markers.append(marker)
+
+            cur_a = cur_a - 1.0 / self.history_length
+            cur_id += 1
+
+        print "Finished with: {}".format(cur_a)
         # self.marker.header.frame_id = frame_id
-        self.marker.ns = "cop"
-        self.marker.id = 1
-        self.marker.type = Marker.POINTS
-        self.marker.action = Marker.ADD
-        self.marker.color.r = 1.0
-        self.marker.color.a = 1.0
-        self.marker.scale.x = 0.01
-        self.marker.scale.y = 0.01
-        self.marker.scale.z = 0.01
-        self.marker.pose.position.x = 0
-        self.marker.pose.position.y = 0
-        self.marker.pose.position.z = 0
-        self.marker.pose.orientation.x = 0
-        self.marker.pose.orientation.y = 0
-        self.marker.pose.orientation.z = 0
-        self.marker.pose.orientation.w = 1.0
-        self.marker.lifetime = rospy.Duration(1.0)
+        # self.marker.ns = "cop"
+        # self.marker.id = 1
+        # self.marker.type = Marker.POINTS
+        # self.marker.action = Marker.ADD
+        # self.marker.color.r = 1.0
+        # self.marker.color.a = 1.0
+        # self.marker.scale.x = 0.01
+        # self.marker.scale.y = 0.01
+        # self.marker.scale.z = 0.01
+        # self.marker.pose.position.x = 0
+        # self.marker.pose.position.y = 0
+        # self.marker.pose.position.z = 0
+        # self.marker.pose.orientation.x = 0
+        # self.marker.pose.orientation.y = 0
+        # self.marker.pose.orientation.z = 0
+        # self.marker.pose.orientation.w = 1.0
+        # self.marker.lifetime = rospy.Duration(1.0)
         # protected region user member variables end #
 
     def configure(self, config):
@@ -144,7 +162,7 @@ class contact_cop_studyImplementation(object):
             self.marker.points.append(data.out_cop)
             self.marker.header.frame_id = data.in_wrench.header.frame_id
 
-            data.out_marker_cop = self.marker
+            data.out_marker_cop.markers = [self.marker]
         else:
             data.out_cop_active = False
             data.out_marker_cop_active = False
@@ -153,4 +171,25 @@ class contact_cop_studyImplementation(object):
         pass
 
     # protected region user additional functions begin #
+
+def create_marker_point(ns='debug', frame_id='map'):
+    """
+    creation of a rviz marker of type point
+    :param ns: namespace to use
+    :param frame_id: reference frame to state
+    :return:
+    """
+    point_marker = Marker()
+    point_marker.header.frame_id = frame_id
+    point_marker.ns = ns
+    point_marker.id = 1
+    point_marker.type = Marker.POINTS
+    point_marker.action = Marker.ADD
+    point_marker.color.r = 1.0
+    point_marker.color.a = 1.0
+    point_marker.scale.x = 0.005
+    point_marker.scale.y = 0.005
+    point_marker.scale.z = 0.005
+    point_marker.lifetime = rospy.Duration(0.1)
+    return point_marker
     # protected region user additional functions end #

@@ -28,7 +28,7 @@ rosrun contact_cop contact_cop_study _[param_name]:=[new_value]
 `cop` *(geometry_msgs::Point)*
 <!--- protected region cop begin -->
 <!--- protected region cop end -->
-`marker_cop` *(visualization_msgs::Marker)*
+`marker_cop` *(visualization_msgs::MarkerArray)*
 <!--- protected region marker_cop begin -->
 <!--- protected region marker_cop end -->
 

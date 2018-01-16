@@ -8,7 +8,7 @@
             description="Wrench measured by a sensor"/>
         <publisher name="cop" type="geometry_msgs::Point"
             description="Computed Center of Pressure"/>
-        <publisher name="marker_cop" type="visualization_msgs::Marker"
+        <publisher name="marker_cop" type="visualization_msgs::MarkerArray"
             description="Marker for rviz at the computed COP"/>
         <parameter name="force_th" type="double" value="1.0"
             description="minmum force norm to compute COP"/>

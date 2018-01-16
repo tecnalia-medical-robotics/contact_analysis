@@ -15,7 +15,7 @@ from contact_cop.cfg import contact_cop_studyConfig
 
 # ROS message & services includes
 from geometry_msgs.msg import Point
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import WrenchStamped
 
 # other includes
@@ -37,7 +37,7 @@ class roscontact_cop_study(object):
 
         srv = Server(contact_cop_studyConfig, self.configure_callback)
         self.cop_ = rospy.Publisher('cop', Point, queue_size=1)
-        self.marker_cop_ = rospy.Publisher('marker_cop', Marker, queue_size=1)
+        self.marker_cop_ = rospy.Publisher('marker_cop', MarkerArray, queue_size=1)
         self.wrench_ = rospy.Subscriber('wrench', WrenchStamped, self.topic_callback_wrench)
 
     def topic_callback_wrench(self, msg):
