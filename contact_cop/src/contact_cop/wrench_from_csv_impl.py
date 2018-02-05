@@ -49,6 +49,15 @@ class wrench_from_csvData(object):
         self.out_loop_active = bool()
         pass
 
+    def __str__(self):
+        msg = "Instance of wrench_from_csvData class: \n {"
+        msg += "out_wrench: {} \n".format(self.out_wrench_active)
+        msg += "out_wrench_active: {} \n".format(self.out_wrench_active)
+        msg += "out_loop: {} \n".format(self.out_loop_active)
+        msg += "out_loop_active: {} \n".format(self.out_loop_active)
+        msg += "}"
+        return msg
+
 class wrench_from_csvPassthrough(object):
     """
     set of passthrough elements slightly violating interface / implementation separation
