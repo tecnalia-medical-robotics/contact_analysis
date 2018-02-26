@@ -93,7 +93,7 @@ class ContactCopImplementation(object):
 
         self.markers = list()
 
-        for i in range(self.history_length):
+        for _ in range(self.history_length):
             marker = create_marker_point("cop", "cop_frame")
             marker.color.a = cur_a
             marker.id = cur_id

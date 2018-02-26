@@ -22,3 +22,4 @@
   </node>
   <node pkg="tf" type="static_transform_publisher" name="sensor_bridge" args="0.1 0.1 0 0 0 0 1 /map /force_sensor 100"/>
 </launch>
+
