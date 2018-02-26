@@ -150,8 +150,8 @@ class ContactEvaluateImplementation(object):
         cops = list()
 
         # check for the number of iteration asked:
-        iteration = int(goal.duration * goal.grequency)
-        rospy.loginfo("Checking for {} data at {} Hz".format(iteation, goal.frequency))
+        iteration = int(goal.learning_duration * goal.frequency)
+        rospy.loginfo("Checking for {} data at {} Hz".format(iteration, goal.frequency))
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_learn.is_preempt_requested():
@@ -162,6 +162,7 @@ class ContactEvaluateImplementation(object):
             cops.append(self.last_cop)
             feedback.sample_number += 1
             self.passthrough.as_learn.publish_feedback(feedback)
+            rate.sleep()
 
         result.success = True
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
