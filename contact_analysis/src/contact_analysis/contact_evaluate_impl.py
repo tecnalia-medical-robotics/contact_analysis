@@ -11,8 +11,8 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import Point
-from contact_msgs.msg import LearnContactAction, LearnContactActionFeedback, LearnContactActionResult
-from contact_msgs.msg import EvaluateContactAction, EvaluateContactActionFeedback, EvaluateContactActionResult
+from contact_msgs.msg import LearnContactFeedback, LearnContactResult
+from contact_msgs.msg import EvaluateContactFeedback, EvaluateContactResult
 
 # protected region user include package begin #
 from copy import deepcopy
@@ -122,19 +122,19 @@ class ContactEvaluateImplementation(object):
         @param self The object
         @param goal(LearnContact) goal provided
 
-        @return (LearnContactResponse) service output
+        @return (LearnContactResponse) action output
         @warning may send some feedback during the task execution
         """
 
         # to provide feedback during action execution
         # to send the feedback, one should use:
         # self.passthrough.as_learn.publish_feedback(feedback)
-        feedback = LearnContactActionFeedback()
+        feedback = LearnContactFeedback()
         # to contain the outcome of the task at completion
         # to send the result, one should use:
         # on suceess:
         # self.passthrough.as_learn.set_succeeded(result)
-        result = LearnContactActionResult()
+        result = LearnContactResult()
         # Remind that preemption request should be checked during action execution:
         # if self.passthrough.as_learn.is_preempt_requested():
         #        rospy.loginfo('Preempted action learn')
@@ -157,13 +157,13 @@ class ContactEvaluateImplementation(object):
                break
 
             cops.append(self.last_cop)
-            feedback.feedback.sample_number += 1
+            feedback.sample_number += 1
             self.passthrough.as_learn.publish_feedback(feedback)
 
-            if feedback.feedback.sample_number > 50:
+            if feedback.sample_number > 50:
                 break
-        result.result.success = True
-        rospy.loginfo("{} cops stored".format(feedback.feedback.sample_number))
+        result.success = True
+        rospy.loginfo("{} cops stored".format(feedback.sample_number))
         self.passthrough.as_learn.set_succeeded(result)
 
 
@@ -176,19 +176,19 @@ class ContactEvaluateImplementation(object):
         @param self The object
         @param goal(EvaluateContact) goal provided
 
-        @return (EvaluateContactResponse) service output
+        @return (EvaluateContactResponse) action output
         @warning may send some feedback during the task execution
         """
 
         # to provide feedback during action execution
         # to send the feedback, one should use:
         # self.passthrough.as_evaluate.publish_feedback(feedback)
-        feedback = EvaluateContactActionFeedback()
+        feedback = EvaluateContactFeedback()
         # to contain the outcome of the task at completion
         # to send the result, one should use:
         # on suceess:
         # self.passthrough.as_evaluate.set_succeeded(result)
-        result = EvaluateContactActionResult()
+        result = EvaluateContactResult()
         # Remind that preemption request should be checked during action execution:
         # if self.passthrough.as_evaluate.is_preempt_requested():
         #        rospy.loginfo('Preempted action evaluate')
