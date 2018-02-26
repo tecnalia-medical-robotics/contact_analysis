@@ -19,7 +19,13 @@
         <parameter name="csv_file" type="std::string" value="Undef"
             description="csv file containing wrench information to publish"/>
         <parameter name="inc" type="int" value="1"
-            description="csv file containing wrench information to publish"/>
+            description="from the wrench measure, increment applied at each publication loop"/>
+        <parameter name="slice_file" type="std::string" value="Undef"
+            description="file containing a list of relevant slices"/>
+        <parameter name="label_file" type="std::string" value="Undef"
+            description="event name (see slice file structure)"/>
+        <publisher name="data_info" type="visualization_msgs::MarkerArray"
+            description="RVIZ Marker for displaying text advancement information"/>
     </node>
 <depend>geometry_msgs</depend>
 </package>

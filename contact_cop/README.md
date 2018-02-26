@@ -60,9 +60,18 @@ rosrun contact_cop wrench_from_csv _[param_name]:=[new_value]
 `inc` *(int, default: 1)*
 <!--- protected region inc begin -->
 <!--- protected region inc end -->
+`slice_file` *(std::string, default: "Undef")*
+<!--- protected region slice_file begin -->
+<!--- protected region slice_file end -->
+`label_file` *(std::string, default: "Undef")*
+<!--- protected region label_file begin -->
+<!--- protected region label_file end -->
 
 ## Published Topics
 `wrench` *(geometry_msgs::WrenchStamped)*
 <!--- protected region wrench begin -->
 <!--- protected region wrench end -->
+`data_info` *(visualization_msgs::MarkerArray)*
+<!--- protected region data_info begin -->
+<!--- protected region data_info end -->
 

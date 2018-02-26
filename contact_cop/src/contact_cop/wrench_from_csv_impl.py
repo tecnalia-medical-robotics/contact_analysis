@@ -11,11 +11,14 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import WrenchStamped
+from visualization_msgs.msg import MarkerArray
 # todo do not need both of them
 
 # protected region user include files begin #
 import csv
 import numpy
+from visualization_msgs.msg import Marker
+import simplejson
 # protected region user include files end #
 
 class wrench_from_csvConfig(object):
@@ -25,12 +28,16 @@ class wrench_from_csvConfig(object):
     def __init__(self):
         self.csv_file = "Undef"
         self.inc = 1
+        self.slice_file = "Undef"
+        self.label_file = "Undef"
         pass
 
     def __str__(self):
         msg = "Instance of wrench_from_csvConfig class: {"
         msg += "csv_file: {} ".format(self.csv_file)
         msg += "inc: {} ".format(self.inc)
+        msg += "slice_file: {} ".format(self.slice_file)
+        msg += "label_file: {} ".format(self.label_file)
         msg += "}"
         return msg
 
@@ -46,12 +53,16 @@ class wrench_from_csvData(object):
         # output data
         self.out_wrench = WrenchStamped()
         self.out_wrench_active = bool()
+        self.out_data_info = MarkerArray()
+        self.out_data_info_active = bool()
         pass
 
     def __str__(self):
         msg = "Instance of wrench_from_csvData class: \n {"
         msg += "out_wrench: {} \n".format(self.out_wrench_active)
         msg += "out_wrench_active: {} \n".format(self.out_wrench_active)
+        msg += "out_data_info: {} \n".format(self.out_data_info_active)
+        msg += "out_data_info_active: {} \n".format(self.out_data_info_active)
         msg += "}"
         return msg
 
@@ -79,6 +90,9 @@ class wrench_from_csvImplementation(object):
         self.wrenches = list()
         # id of the last wrench published
         self.id_wrench = -1
+        self.marker = create_marker_text("ref", "map")
+        self.slices = list()
+        self.label = dict()
         # protected region user member variables end #
 
     def configure(self, config):
@@ -90,7 +104,6 @@ class wrench_from_csvImplementation(object):
         """
         # protected region user configure begin #
         rospy.loginfo("opening file {}".format(config.csv_file))
-
 
         try:
             with open(config.csv_file, 'rb') as file_handler:
@@ -123,6 +136,26 @@ class wrench_from_csvImplementation(object):
 
         rospy.loginfo("Loaded {} wrenches".format(len(self.wrenches)))
 
+        if config.slice_file != "undef":
+            rospy.loginfo("Loading slice file")
+            try:
+                with open(config.slice_file) as f:
+                        self.slices = simplejson.load(f)
+            except (IOError, simplejson.scanner.JSONDecodeError) as error:
+                rospy.logerr("Prb while loading file")
+                rospy.logerr("Error: {}".format(error))
+                self.slices = list()
+
+        if config.label_file != "undef":
+            rospy.loginfo("Loading label file")
+            try:
+                with open(config.label_file) as f:
+                    self.labels=eval(f.read())
+            except IOError as error:
+                rospy.logerr("Prb while loading file")
+                rospy.logerr("Error: {}".format(error))
+                self.labels = dict()
+
         # protected region user configure end #
         return True
 
@@ -138,7 +171,7 @@ class wrench_from_csvImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-        rospy.loginfo("Check : inc is {} ".format(config.inc))
+        # rospy.loginfo("Check : inc is {} ".format(config.inc))
         self.id_wrench += config.inc
         if self.id_wrench >= len(self.wrenches):
             rospy.loginfo("Published all wrenches, looping at next iteration")
@@ -148,8 +181,47 @@ class wrench_from_csvImplementation(object):
         wrench = self.wrenches[self.id_wrench]
         wrench.header.stamp = rospy.get_rostime()
         data.out_wrench = wrench
+
+
+        idx_label = get_relevant_slices(self.id_wrench, self.slices)
+        if idx_label in self.labels:
+            label = self.labels[idx_label]
+        else:
+            label = "nop"
+        self.marker.header.stamp = wrench.header.stamp
+        self.marker.text = "data {} {}".format(self.id_wrench, label)
+        data.out_data_info.markers = [self.marker]
         # protected region user update end #
         pass
 
     # protected region user additional functions begin #
+def create_marker_text(ns='debug', frame_id='map'):
+    """
+    creation of a rviz marker of type point
+    :param ns: namespace to use
+    :param frame_id: reference frame to state
+    :return:
+    """
+    point_marker = Marker()
+    point_marker.header.frame_id = frame_id
+    point_marker.ns = ns
+    point_marker.id = 1
+    point_marker.type = Marker.TEXT_VIEW_FACING
+    point_marker.action = Marker.ADD
+    point_marker.color.r = 1.0
+    point_marker.color.g = 1.0
+    point_marker.color.b = 1.0
+
+    point_marker.color.a = 1.0
+    point_marker.scale.x = 0.005
+    point_marker.scale.y = 0.005
+    point_marker.scale.z = 0.005
+    point_marker.lifetime = rospy.Duration(0.1)
+    return point_marker
+
+def get_relevant_slices(idx, slices):
+    for oneslice in slices:
+        if idx >= oneslice[1] and idx <= oneslice[2]:
+            return oneslice[0]
+    return -1
     # protected region user additional functions end #

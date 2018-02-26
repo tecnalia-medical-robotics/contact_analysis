@@ -153,7 +153,7 @@ class contact_cop_studyImplementation(object):
 
         force_norm = numpy.linalg.norm(force)
 
-        if force_norm > config.force_th:
+        if force_norm > config.force_th and force[2] != 0:
             data.out_cop.x = - torque[1] / force[2]
             data.out_cop.y = torque[0] / force[2]
             data.out_cop.z = 0.0
