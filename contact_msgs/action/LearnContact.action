@@ -2,7 +2,7 @@
 # frequency at which the cop should be looked for
 # if unset or 0, default config value used
 int32 frequency
-# duration (ms) of the recording
+# duration (s) of the recording
 # if unset or 0, default config value used
 int32 learning_duration
 # whether the current contact is considered to be good or bad
