@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- fake sensor data are loaded and published, as would do a real sensor.-->
+  <!-- the action gui is opened with action learn. Similar operation can be done by replacing "learn" with "evaluate" in the command-->
+  <!-- possible value: 0 or 4 for now-->
+  <arg name="file_num" default="0"/>
+
+  <arg name="inc" default="10"/>
+  <!--  loading wrench from csv and publish them in loop-->
+  <node name="wrench_from_csv" pkg= "contact_analysis" type= "wrench_from_csv" output="screen">
+    <param name="csv_file" type="str" value="$(find contact_test_data)/data/wrench$(arg file_num)_sample.csv"/>
+    <param name="inc" type="int" value="$(arg inc)"/>
+  </node>
+  <!-- atatic transform to see cop data in rviz-->
+  <node pkg="tf" type="static_transform_publisher" name="sensor_bridge" args="0.1 0.1 0 0 0 0 1 /map /force_sensor 100"/>
+  <!-- launch the cop compuation -->
+  <node pkg="contact_analysis" type="contact_cop" name="contact_cop"/>
+  <!-- launch the contact evaluation-->
+  <node pkg="contact_analysis" type="contact_evaluate" name="contact_evaluate"/>
+  <!-- launch the gui client for actions-->
+  <node pkg="actionlib" type="axclient.py" name="ax_client" args="/learn"/>
+</launch>
