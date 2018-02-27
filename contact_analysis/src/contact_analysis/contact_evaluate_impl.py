@@ -94,6 +94,7 @@ class ContactEvaluateImplementation(object):
             # todo: ask for the action termination
             return False
 
+        self.config = deepcopy(config)
         self.active_action = None
         # protected region user configure end #
         return True
@@ -110,6 +111,7 @@ class ContactEvaluateImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        self.config = config
         if data.in_cop_updated:
             self.last_cop = deepcopy(data.in_cop)
         # protected region user update end #
@@ -144,7 +146,6 @@ class ContactEvaluateImplementation(object):
 
         # protected region user implementation of action callback for learn begin #
         rate = rospy.Rate(goal.frequency)
-        success = True
         rospy.loginfo("Received goal: {}".format(goal))
         rospy.loginfo("Check: Feedback: \n {}, \n Result: \n {} ".format(feedback, result))
         cops = list()
@@ -155,7 +156,7 @@ class ContactEvaluateImplementation(object):
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_learn.is_preempt_requested():
-               rospy.loginfo('%s: Preempted action do_action')
+               rospy.loginfo('%s: Preempted action as_learn')
                self.passthrough.as_learn.set_preempted()
                break
 
@@ -167,8 +168,6 @@ class ContactEvaluateImplementation(object):
         result.success = True
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
         self.passthrough.as_learn.set_succeeded(result)
-
-
         # protected region user implementation of action callback for learn end #
 
     def callback_evaluate(self, goal):
@@ -199,6 +198,29 @@ class ContactEvaluateImplementation(object):
         #        break
 
         # protected region user implementation of action callback for evaluate begin #
+        rate = rospy.Rate(goal.frequency)
+        rospy.loginfo("Received goal: {}".format(goal))
+        rospy.loginfo("Check: Feedback: \n {}, \n Result: \n {} ".format(feedback, result))
+        cops = list()
+
+        # check for the number of iteration asked:
+        iteration = int(goal.learning_duration * goal.frequency)
+        rospy.loginfo("Checking for {} data at {} Hz".format(iteration, goal.frequency))
+        for _ in xrange(iteration):
+            # check that preempt has not been requested by the client
+            if self.passthrough.as_evaluate.is_preempt_requested():
+               rospy.loginfo('%s: Preempted action as_evaluate')
+               self.passthrough.as_evaluate.set_preempted()
+               break
+
+            cops.append(self.last_cop)
+            feedback.sample_number += 1
+            self.passthrough.as_evaluate.publish_feedback(feedback)
+            rate.sleep()
+
+        result.success = True
+        rospy.loginfo("{} cops stored".format(feedback.sample_number))
+        self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
 
     # protected region user additional functions begin #
