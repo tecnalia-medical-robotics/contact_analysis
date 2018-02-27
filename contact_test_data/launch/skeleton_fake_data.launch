@@ -11,7 +11,7 @@
     <param name="csv_file" type="str" value="$(find contact_test_data)/data/wrench$(arg file_num)_sample.csv"/>
     <param name="inc" type="int" value="$(arg inc)"/>
   </node>
-  <!-- atatic transform to see cop data in rviz-->
+  <!-- static transform to see cop data in rviz-->
   <node pkg="tf" type="static_transform_publisher" name="sensor_bridge" args="0.1 0.1 0 0 0 0 1 /map /force_sensor 100"/>
   <!-- launch the cop compuation -->
   <node pkg="contact_analysis" type="contact_cop" name="contact_cop"/>

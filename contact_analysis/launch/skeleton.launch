@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- the action gui is opened with action learn. Similar operation can be done by replacing "learn" with "evaluate" in the command-->
+    <!-- possible value: 0 or 4 for now-->
+    <arg name="force_frame" default="sensor_force_frame"/>
+    <!-- static transform to see cop data in rviz-->
+    <!-- launch the cop computation -->
+    <node pkg="contact_analysis" type="contact_cop" name="contact_cop">
+        <remap from="wrench" to="$(arg force_frame)" />
+    </node>
+    <!-- launch the contact evaluation-->
+    <node pkg="contact_analysis" type="contact_evaluate" name="contact_evaluate"/>
+    <!-- launch the gui client for actions-->
+    <node pkg="actionlib" type="axclient.py" name="ax_client" args="/learn"/>
+</launch>
