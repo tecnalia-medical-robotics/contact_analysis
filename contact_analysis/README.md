@@ -100,10 +100,25 @@ RVIZ Marker for displaying text advancement information
 <!--- protected region publisher data_info end -->
 
 # Node: contact_evaluate
-Update frequency: 200 Hz.
+Update frequency: 1000 Hz.
 
 <!--- protected region contact_evaluate begin -->
 <!--- protected region contact_evaluate end -->
+
+## Dynamic Parameters
+
+All dynamic parameters can be set through the command line:
+```
+rosrun contact_analysis contact_evaluate _[param_name]:=[new_value]
+```
+`frequency` *(int, default: 200)*
+<!--- protected region param frequency begin -->
+frequency at which we will to acquire cop
+<!--- protected region param frequency end -->
+`obs_duration` *(double, default: 1.0)*
+<!--- protected region param obs_duration begin -->
+duration of the recording for learning or recognition (sec)
+<!--- protected region param obs_duration end -->
 
 ## Subscribed Topics
 

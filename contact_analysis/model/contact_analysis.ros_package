@@ -36,7 +36,7 @@
             description="to evaluate a contact taking place"/>
         <parameter name="frequency" type="int" value="200"
             description="frequency at which we will to acquire cop"/>
-        <parameter name="obs_duration" type="float" value="1.0"
+        <parameter name="obs_duration" type="double" value="1.0"
             description="duration of the recording for learning or recognition (sec)"/>
     </node>
 <depend>geometry_msgs</depend>
