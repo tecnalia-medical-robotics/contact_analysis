@@ -7,7 +7,7 @@ This code is developed in the context of SARAFun.
 * `contact_analysis` : main nodes to analyse a contact based on Center of Pressure (COP):
  * `contact_cop`: compute the COP from a stamped wrench recieved by subscription
  * `contact_evaluate`: provides two actions, for learning and, later on, evaluating a contact takin place.
- * `wrench_from_csv`: publish a wrench from a csv file containing only wrench information (examples in [contact_test_data/data/wrench0_sample.csv][contact_test_data/data/wrench0_sample.csv])
+ * `wrench_from_csv`: publish a wrench from a csv file containing only wrench information (examples in [contact_test_data/data/wrench0_sample.csv](contact_test_data/data/wrench0_sample.csv) )
 * `contact_test_data`: contains a set of wrench sample that can be used for testing of the component.
 
 ## Use
