@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-@package contact_cop
-@file contact_cop_study_ros.py
+@package contact_analysis
+@file contact_cop_ros.py
 @author Anthony Remazeilles
 @brief Analysis of the Center of Pressure related to contact points
 
@@ -11,21 +11,19 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from dynamic_reconfigure.server import Server
-from contact_cop.cfg import contact_cop_studyConfig
+from contact_analysis.cfg import contact_copConfig
 
 # ROS message & services includes
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import WrenchStamped
-from std_msgs.msg import Bool
-from plot_tool.srv import PlotPose
 
 # other includes
-from contact_cop import contact_cop_study_impl
+from contact_analysis import contact_cop_impl
 from copy import deepcopy
 
 # todo set a function to write correctly the name
-class roscontact_cop_study(object):
+class ContactCopROS(object):
     """
     ROS interface class, handling all communication with ROS
     """
@@ -33,18 +31,14 @@ class roscontact_cop_study(object):
         """
         Attributes definition
         """
-        self.component_data_ = contact_cop_study_impl.contact_cop_studyData()
-        self.component_config_ = contact_cop_study_impl.contact_cop_studyConfig()
-        self.component_implementation_ = contact_cop_study_impl.contact_cop_studyImplementation()
+        self.component_data_ = contact_cop_impl.ContactCopData()
+        self.component_config_ = contact_cop_impl.ContactCopConfig()
+        self.component_implementation_ = contact_cop_impl.ContactCopImplementation()
 
-        srv = Server(contact_cop_studyConfig, self.configure_callback)
+        srv = Server(contact_copConfig, self.configure_callback)
         self.cop_ = rospy.Publisher('cop', Point, queue_size=1)
         self.marker_cop_ = rospy.Publisher('marker_cop', MarkerArray, queue_size=1)
         self.wrench_ = rospy.Subscriber('wrench', WrenchStamped, self.topic_callback_wrench)
-        self.loop_ = rospy.Subscriber('loop', Bool, self.topic_callback_loop)
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~display_remap", "display")
-        self.component_implementation_.passthrough.client_display = rospy.ServiceProxy(remap, PlotPose);
 
     def topic_callback_wrench(self, msg):
         """
@@ -53,20 +47,12 @@ class roscontact_cop_study(object):
         self.component_data_.in_wrench = msg
         self.component_data_.in_wrench_updated = True
 
-    def topic_callback_loop(self, msg):
-        """
-        callback called at message reception
-        """
-        self.component_data_.in_loop = msg
-        self.component_data_.in_loop_updated = True
-
     def configure_callback(self, config, level):
         """
         callback on the change of parameters dynamically adjustable
         """
         self.component_config_.force_th = config.force_th
         return config
-
 
     def configure(self):
         """
@@ -78,10 +64,8 @@ class roscontact_cop_study(object):
         """
         activate all defined output
         """
-
         self.component_data_.out_cop_active = True
         self.component_data_.out_marker_cop_active = True
-
         pass
 
     def set_all_output_read(self):
@@ -89,7 +73,6 @@ class roscontact_cop_study(object):
         set related flag to state that input has been read
         """
         self.component_data_.in_wrench_updated = False
-        self.component_data_.in_loop_updated = False
         pass
 
     def update(self, event):
@@ -126,15 +109,14 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("contact_cop_study", anonymous=True)
+    rospy.init_node("contact_cop", anonymous=True)
 
-    node = roscontact_cop_study()
+    node = ContactCopROS()
     if not node.configure():
         rospy.logfatal("Could not configure the node")
         rospy.logfatal("Please check configuration parameters")
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 50), node.update)
-    rospy.Timer(rospy.Duration(1.0 / 100), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
     rospy.spin()

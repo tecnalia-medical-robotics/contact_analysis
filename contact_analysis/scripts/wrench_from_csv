@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+"""
+@package contact_analysis
+@file wrench_from_csv
+@author Anthony Remazeilles
+@brief Analysis of the Center of Pressure related to contact points
+        Entry point to the node.
+Copyright (C) {packageCopyright}
+https://www.gnu.org/licenses/gpl.txt
+"""
+from contact_analysis.wrench_from_csv_ros import main
+
+if __name__ == '__main__':
+    main()

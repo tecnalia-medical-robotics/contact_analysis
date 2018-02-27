@@ -1,27 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="contact_cop" author="Anthony Remazeilles"
+<package name="contact_analysis" author="Anthony Remazeilles"
     author_email="anthony.remazeilles@tecnalia.com"
     description="Analysis of the Center of Pressure related to contact points"
     license="https://www.gnu.org/licenses/gpl.txt">
-    <node name="contact_cop_study" frequency="100">
+    <node name="contact_cop" frequency="1000">
         <subscriber name="wrench" type="geometry_msgs::WrenchStamped"
             description="Wrench measured by a sensor"/>
-        <subscriber name="loop" type="std_msgs::Bool"
-            description="whether we are looping"/>
         <publisher name="cop" type="geometry_msgs::Point"
             description="Computed Center of Pressure"/>
         <publisher name="marker_cop" type="visualization_msgs::MarkerArray"
             description="Marker for rviz at the computed COP"/>
         <parameter name="force_th" type="double" value="1.0"
             description="minmum force norm to compute COP"/>
-        <serviceClient name="display" type="plot_tool::PlotPose"
-            description="to enable data plotting"/>
     </node>
     <node name="wrench_from_csv" frequency="1000">
         <publisher name="wrench" type="geometry_msgs::WrenchStamped"
             description="emulated wrench measure"/>
-        <publisher name="loop" type="std_msgs::Bool"
-            description="to inform that we are looping the data"/>
         <parameter name="csv_file" type="std::string" value="Undef"
             description="csv file containing wrench information to publish"/>
         <parameter name="inc" type="int" value="1"
@@ -33,7 +27,15 @@
         <publisher name="data_info" type="visualization_msgs::MarkerArray"
             description="RVIZ Marker for displaying text advancement information"/>
     </node>
+    <node name="contact_evaluate" frequency="200">
+        <subscriber name="cop" type="geometry_msgs::Point"
+            description="computed cop"/>
+        <actionServer name="learn" type="contact_msgs::LearnContact"
+            description="to learn a new contact" />
+        <actionServer name="evaluate" type = "contact_msgs::EvaluateContact"
+            description="to evaluate a contact taking place"/>
+    </node>
 <depend>geometry_msgs</depend>
-<depend>std_msgs</depend>
-<depend>plot_tool</depend>
+<depend>visualization_msgs</depend>
+<depend>actionlib</depend>
 </package>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(contact_cop)
+project(contact_analysis)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -7,10 +7,11 @@ project(contact_cop)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
-  std_msgs
-  plot_tool
-  dynamic_reconfigure
   visualization_msgs
+  actionlib
+  dynamic_reconfigure
+  contact_msgs
+  actionlib_msgs
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -22,24 +23,31 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 # This could be simplified with a test across nodes.
-if (contact_cop_dyn_rec_files)
-  list(APPEND contact_cop_dyn_rec_files cfg/contact_cop_study.cfg)
-  message("Append of cfg/contact_cop_study.cfg")
+if (contact_analysis_dyn_rec_files)
+  list(APPEND contact_analysis_dyn_rec_files cfg/contact_cop.cfg)
+  message("Append of cfg/contact_cop.cfg")
 else ()
-  set(contact_cop_dyn_rec_files cfg/contact_cop_study.cfg)
-  message("Setting with cfg/contact_cop_study.cfg")
+  set(contact_analysis_dyn_rec_files cfg/contact_cop.cfg)
+  message("Setting with cfg/contact_cop.cfg")
 endif ()
-if (contact_cop_dyn_rec_files)
-  list(APPEND contact_cop_dyn_rec_files cfg/wrench_from_csv.cfg)
+if (contact_analysis_dyn_rec_files)
+  list(APPEND contact_analysis_dyn_rec_files cfg/wrench_from_csv.cfg)
   message("Append of cfg/wrench_from_csv.cfg")
 else ()
-  set(contact_cop_dyn_rec_files cfg/wrench_from_csv.cfg)
+  set(contact_analysis_dyn_rec_files cfg/wrench_from_csv.cfg)
   message("Setting with cfg/wrench_from_csv.cfg")
 endif ()
+if (contact_analysis_dyn_rec_files)
+  list(APPEND contact_analysis_dyn_rec_files cfg/contact_evaluate.cfg)
+  message("Append of cfg/contact_evaluate.cfg")
+else ()
+  set(contact_analysis_dyn_rec_files cfg/contact_evaluate.cfg)
+  message("Setting with cfg/contact_evaluate.cfg")
+endif ()
 
-message("Test: ${contact_cop_dyn_rec_files}")
-if (contact_cop_dyn_rec_files)
-  generate_dynamic_reconfigure_options(${contact_cop_dyn_rec_files})
+message("Test: ${contact_analysis_dyn_rec_files}")
+if (contact_analysis_dyn_rec_files)
+  generate_dynamic_reconfigure_options(${contact_analysis_dyn_rec_files})
 endif ()
 
 ###################################
@@ -54,10 +62,11 @@ catkin_package(
   CATKIN_DEPENDS
     rospy
     geometry_msgs
-    std_msgs
-    plot_tool
-    dynamic_reconfigure
     visualization_msgs
+    actionlib
+    dynamic_reconfigure
+    contact_msgs
+    actionlib_msgs
 )
 
 ###########

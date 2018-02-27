@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+"""
+@package contact_analysis
+@file contact_cop
+@author Anthony Remazeilles
+@brief Analysis of the Center of Pressure related to contact points
+        Entry point to the node.
+Copyright (C) {packageCopyright}
+https://www.gnu.org/licenses/gpl.txt
+"""
+from contact_analysis.contact_cop_ros import main
+
+if __name__ == '__main__':
+    main()
