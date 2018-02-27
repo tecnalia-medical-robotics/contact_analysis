@@ -1,34 +1,34 @@
 # SARAFun contact analysis
 
+This code is developed in the context of SARAFun.
+
 ## Content
 
-* `contact_cop` : tools for computing the _Center Of Pressure_ from a wrench.
- * program to compute the cop from a wrench stamped
- * program to generate wrenchstamped from a csv file
+* `contact_analysis` : main nodes to analyse a contact based on Center of Pressure (COP):
+ * `contact_cop`: compute the COP from a stamped wrench recieved by subscription
+ * `contact_evaluate`: provides two actions, for learning and, later on, evaluating a contact takin place.
+ * `wrench_from_csv`: publish a wrench from a csv file containing only wrench information (examples in [contact_test_data/data/wrench0_sample.csv][contact_test_data/data/wrench0_sample.csv])
+* `contact_test_data`: contains a set of wrench sample that can be used for testing of the component.
 
-## Needed
+## Use
 
-* cop visualization:
- * one visualization could be done directly by publishing a marker to tf, in contact_cop -- done
-  * need to see the tail of the measurement while it is added.
- * a second could be done in a python graph, as done for the sarafun_plot structure. -- would require loading a reference file before hand.
-   The file structure might be an issue
+**Warning**
+The current code is under development.
+The COP evaluation is for instance just the skeleton.
+No intelligence placed in it so far.
 
-* Current limitation:
- * we do not see anything :)
-  * cop: generated everytime
-   * sol1:
-    * add a service to load a reference set from point file
-     * load it, progressively, shows it and generate the confident ellipse
-      * returns the confident ellipse form it.
+**Checking the good installation**
 
- * from csv:
-  * instead of loading all the file, go for each subsequent group
-   * add a service to do it from file (on demand)
-    * file / label / loop
-   * This way we can compare, reduce velocity also.
+You can simply run the following code, once the workspace built:
 
-## ros_generator issues
-* when regenerating a package, we should leave the current file, and inform about the file / directory left in it.
+```
+roslaunch contact_test_data skeleton_fake_data.launch
+```
+This will (1) laod a wrench sample file, and publish it (`wrench_from_csv`), (2) compute the related COP (`contact_cop`), and provide actions for learning a contact model and evaluating it (`contact_evaluate`), and finally launch a action gui client to launch one of the two actions (through `axclient.py`)
 
-* tools for generating a COP from measurement.
+**Connecting to a real force sensor**
+
+```
+roslaunch contact_analysis skeleton.launch force_topic:=[topic_name]
+```
+where `[topic_name]` is to be adjusted according to the real setup.
