@@ -27,13 +27,17 @@
         <publisher name="data_info" type="visualization_msgs::MarkerArray"
             description="RVIZ Marker for displaying text advancement information"/>
     </node>
-    <node name="contact_evaluate" frequency="200">
+    <node name="contact_evaluate" frequency="1000">
         <subscriber name="cop" type="geometry_msgs::Point"
             description="computed cop"/>
         <actionServer name="learn" type="contact_msgs::LearnContact"
             description="to learn a new contact" />
         <actionServer name="evaluate" type = "contact_msgs::EvaluateContact"
             description="to evaluate a contact taking place"/>
+        <parameter name="frequency" type="int" value="200"
+            description="frequency at which we will to acquire cop"/>
+        <parameter name="obs_duration" type="float" value="1.0"
+            description="duration of the recording for learning or recognition (sec)"/>
     </node>
 <depend>geometry_msgs</depend>
 <depend>visualization_msgs</depend>
