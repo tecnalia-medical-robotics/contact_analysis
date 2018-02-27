@@ -102,25 +102,7 @@ class ContactCopImplementation(object):
             cur_a = cur_a - 1.0 / self.history_length
             cur_id += 1
 
-        print "Finished with: {}".format(cur_a)
-        # self.marker.header.frame_id = frame_id
-        # self.marker.ns = "cop"
-        # self.marker.id = 1
-        # self.marker.type = Marker.POINTS
-        # self.marker.action = Marker.ADD
-        # self.marker.color.r = 1.0
-        # self.marker.color.a = 1.0
-        # self.marker.scale.x = 0.01
-        # self.marker.scale.y = 0.01
-        # self.marker.scale.z = 0.01
-        # self.marker.pose.position.x = 0
-        # self.marker.pose.position.y = 0
-        # self.marker.pose.position.z = 0
-        # self.marker.pose.orientation.x = 0
-        # self.marker.pose.orientation.y = 0
-        # self.marker.pose.orientation.z = 0
-        # self.marker.pose.orientation.w = 1.0
-        # self.marker.lifetime = rospy.Duration(1.0)
+        # print "Finished with: {}".format(cur_a)
         # protected region user member variables end #
 
     def configure(self, config):

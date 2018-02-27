@@ -149,9 +149,18 @@ class ContactEvaluateImplementation(object):
         #        break
 
         # protected region user implementation of action callback for learn begin #
-        rate = rospy.Rate(goal.frequency)
         rospy.loginfo("Received goal: {}".format(goal))
-        rospy.loginfo("Check: Feedback: \n {}, \n Result: \n {} ".format(feedback, result))
+
+        if goal.frequency == 0:
+            rospy.logwarn("Frequency unset. Forced to {}".format(self.config.frequency))
+            goal.frequency = self.config.frequency
+
+        if goal.learning_duration == 0:
+            rospy.logwarn("learning_duration unset. Forced to {}".format(self.config.obs_duration))
+            goal.learning_duration = self.config.obs_duration
+
+        rate = rospy.Rate(goal.frequency)
+        # rospy.loginfo("Check: Feedback: \n {}, \n Result: \n {} ".format(feedback, result))
         cops = list()
 
         # check for the number of iteration asked:
@@ -202,9 +211,19 @@ class ContactEvaluateImplementation(object):
         #        break
 
         # protected region user implementation of action callback for evaluate begin #
-        rate = rospy.Rate(goal.frequency)
+
         rospy.loginfo("Received goal: {}".format(goal))
-        rospy.loginfo("Check: Feedback: \n {}, \n Result: \n {} ".format(feedback, result))
+
+        if goal.frequency == 0:
+            rospy.logwarn("Frequency unset. Forced to {}".format(self.config.frequency))
+            goal.frequency = self.config.frequency
+
+        if goal.learning_duration == 0:
+            rospy.logwarn("learning_duration unset. Forced to {}".format(self.config.obs_duration))
+            goal.learning_duration = self.config.obs_duration
+
+        rate = rospy.Rate(goal.frequency)
+
         cops = list()
 
         # check for the number of iteration asked:
@@ -223,6 +242,8 @@ class ContactEvaluateImplementation(object):
             rate.sleep()
 
         result.success = True
+        result.is_good = True
+        result.confidence = 1.0
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
