@@ -13,7 +13,7 @@
   </node>
   <!-- static transform to see cop data in rviz-->
   <node pkg="tf" type="static_transform_publisher" name="sensor_bridge" args="0.1 0.1 0 0 0 0 1 /map /force_sensor 100"/>
-  <!-- launch the cop compuation -->
+  <!-- launch the cop computation -->
   <node pkg="contact_analysis" type="contact_cop" name="contact_cop"/>
   <!-- launch the contact evaluation-->
   <node pkg="contact_analysis" type="contact_evaluate" name="contact_evaluate"/>
