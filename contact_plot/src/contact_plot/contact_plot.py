@@ -17,6 +17,33 @@ import os
 import yaml
 from contact_def.ar_contact_set import ContactForceSet
 
+
+# original example provided at page:
+# https://matplotlib.org/users/event_handling.html
+# use to display a point, and display it around
+class EnhancedGraph(object):
+    def __init__(self, line, text):
+        self.line = line
+        self.text = text
+        self.xs = list(line.get_xdata())
+        self.ys = list(line.get_ydata())
+
+        self.cid = line.figure.canvas.mpl_connect('motion_notify_event', self)
+
+    def __call__(self, event):
+        # print('click', event)
+        if event.inaxes!=self.line.axes: return
+        self.xs.append(event.xdata)
+        self.ys.append(event.ydata)
+        #self.line.set_data(self.xs, self.ys)
+
+        msg = 'pt: {}-{}\n'.format(event.xdata, event.ydata)
+        print msg
+        #self.text.set_text(msg)
+        self.line.set_data(event.xdata, event.ydata)
+        #self.line.figure.canvas.draw()
+
+
 class AnimatedContact(object):
 
     def __init__(self):
@@ -34,6 +61,7 @@ class AnimatedContact(object):
         # set of needed structures for graph management.
         # figure handler
         self.fig = None
+        self.ax = None
         # animation handler
         self.anim = None
         # tbd loop function param
@@ -48,7 +76,26 @@ class AnimatedContact(object):
         if not self.contact_set.load_contacts():
             rospy.log_error("Prb while loading data")
             return False
+
         return True
+
+    def init_graph(self):
+        """
+        @brief initialize the graph to be shown
+        """
+
+        self.fig, self.ax = self.contact_set.get_graph()
+
+        # initializa interaction tools
+
+        self.input, = self.ax.plot([0.1], [-0.2], 'o', color='b')
+
+        self.cursor, = self.ax.plot([0], [0], 'o')  # empty line
+        self.text = self.ax.text(0.05, 0.05, 'selected: none',
+                             transform=self.ax.transAxes, va='top')
+        self.enhanced_graph = EnhancedGraph(self.cursor, self.text)
+
+        self.lines = [self.input, self.cursor, self.text]
 
     def animation_loop(self, num):
         """
@@ -59,12 +106,16 @@ class AnimatedContact(object):
 
         @return { description_of_the_return_value }
         """
-
         if rospy.is_shutdown():
             self.anim.event_sources.stop()
             plt.close(self.fig)
             return self.lines
         # update the graph
+        # print num
+        #self.lines.set_data(0.1 + num * 0.005, -0.2)
+        self.input.set_data(0.1 + num * 0.005, -0.2)
+        #self.cursor.set_data(self.enhanced_graph.xs, self.enhanced_graph.ys)
+
         # done
         return self.lines
 
@@ -75,6 +126,7 @@ class AnimatedContact(object):
         @param      self The object
 
         """
+
         try:
             # todo check the frames parameter
             self.anim = animation.FuncAnimation(self.fig,
@@ -96,7 +148,8 @@ if __name__ == '__main__':
     is_init_ok = display.load_data(cfg_file)
     if is_init_ok:
         rospy.loginfo("Ready to display data")
-        #display.launch_loop()
-        #rospy.spin()
+        display.init_graph()
+        display.launch_loop()
+        rospy.spin()
     else:
         rospy.logerr("Prb in initialization. Bye")

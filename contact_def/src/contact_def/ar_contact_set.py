@@ -9,8 +9,20 @@ Copyright (C) 2017 Tecnalia Research and Innovation
 
 import yaml
 import os
+import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+
 from ar_basic_class import BasicClass
 from ar_contact_class import ContactForce
+
+def get_cmap(n, name='hsv'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+    RGB color; the keyword argument name must be a standard mpl colormap name.
+    For changeing the map, see the following link:
+    https://matplotlib.org/1.3.1/examples/color/colormaps_reference.html
+    '''
+    return plt.cm.get_cmap(name, n)
+
 
 class ContactForceSet(BasicClass):
     """
@@ -88,7 +100,48 @@ class ContactForceSet(BasicClass):
             self.log("set {} - {} - {}".format(i, item.name_, item.cop_))
         return True
 
+    def get_graph(self):
+        """
+        @brief generate the graph of the contacts
+        @param      self The object
+        @return The graph.
+        @todo add a label to the sets
+        """
 
+        fig_glob, ax_glob = plt.subplots()
+        ax_glob.set_title("Global COP Analysis")
+
+        colors = get_cmap(len(self.contacts) + 1)
+
+        for i, contact in enumerate(self.contacts):
+            cop = contact.cop_
+            if len(cop) > 0:
+                #ax_glob.plot(cop[:, 0], cop[:, 1], 'o', color=colors(i), label="{}-{}".format(i + 1, labels[i + 1]))
+                ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(i))
+
+                [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
+
+                ellipse =Ellipse(cop_mean, width=major_axis,
+                                 height=minor_axis, angle=angle)
+                ellipse.set_color(colors(i))
+                ellipse.set_alpha(0.6)
+                ellipse.set_clip_box(ax_glob.bbox)
+                ax_glob.add_artist(ellipse)
+            else:
+                self.log_warn("No points for {}".format(i+1))
+        ax_glob.legend()
+
+        # import matplotlib.patches as mpatches
+        # texts = ["Exp {}".format(i + 1) for i in range(5)]
+        # patches = [ mpatches.Patch(color=colors[i], label="{:s}".format(labels[relevant_slices[i][0]]) ) for i in range(len(relevant_slices)) ]
+        # plt.legend(handles=patches, ncol=2 )
+
+        ax_glob.set_xlabel("x[mm]")
+        ax_glob.set_ylabel("y[mm]")
+        ax_glob.grid()
+        ax_glob.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=3, fancybox=True, shadow=True)
+
+        return fig_glob, ax_glob
 
 if __name__ == "__main__":
     print "Hello world"
@@ -96,3 +149,6 @@ if __name__ == "__main__":
     lcontacts = ContactForceSet()
     lcontacts.set_cfg_file("/home/anthony/tmp/sarafun_contacts/config.yaml")
     lcontacts.load_contacts()
+
+    lcontacts.get_graph()
+    plt.show()
