@@ -10,6 +10,7 @@ project(contact_plot)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   rospy
+  contact_def
 )
 
 ## System dependencies are found with CMake's conventions
@@ -34,7 +35,7 @@ catkin_python_setup()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES contact_plot
-    CATKIN_DEPENDS geometry_msgs rospy
+    CATKIN_DEPENDS geometry_msgs rospy contact_def
 #  DEPENDS system_lib
 )
 

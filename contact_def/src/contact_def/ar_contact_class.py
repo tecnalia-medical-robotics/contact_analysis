@@ -1,3 +1,4 @@
+# !/usr/bin/env python
 """
 Copyright (C) 2017 Tecnalia Research and Innovation
 

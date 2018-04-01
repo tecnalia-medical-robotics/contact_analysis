@@ -11,8 +11,11 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
 import rospy
-import numpy
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import os
+import yaml
+from contact_def.ar_contact_set import ContactForceSet
 
 class AnimatedContact(object):
 
@@ -24,7 +27,10 @@ class AnimatedContact(object):
         """
 
         # to contain the contact set
-        self.lcontacts = None
+        self.contact_set = ContactForceSet()
+        # config file
+        self.cfg = None
+
         # set of needed structures for graph management.
         # figure handler
         self.fig = None
@@ -32,20 +38,16 @@ class AnimatedContact(object):
         self.anim = None
         # tbd loop function param
         self.lines = None
-        # to be done
+        # to be completed
 
-        # whether initialization is ok
-        self.is_init_ok = False
+    def load_data(self, cfg_file):
 
-    def def_dir_path(self, dirname):
-        """
-        @brief set the path to the set of files
-        @param      self The object
-        @param      dirname name of the directory to load
-
-        @return True on success
-        """
-
+        if not self.contact_set.set_cfg_file(cfg_file):
+            rospy.log_error("Prb wile setting cfg file")
+            return False
+        if not self.contact_set.load_contacts():
+            rospy.log_error("Prb while loading data")
+            return False
         return True
 
     def animation_loop(self, num):
@@ -86,12 +88,15 @@ class AnimatedContact(object):
             rospy.loginfo("end of the animation")
         rospy.loginfo("Bye")
 
-    if __name__ == '__main__':
+if __name__ == '__main__':
     rospy.init_node('contact_plot', anonymous=True)
     display = AnimatedContact()
 
-    if display.is_init_ok:
-        display.loop()
-        rospy.spin()
+    cfg_file = "/home/anthony/tmp/sarafun_contacts/config.yaml"
+    is_init_ok = display.load_data(cfg_file)
+    if is_init_ok:
+        rospy.loginfo("Ready to display data")
+        #display.launch_loop()
+        #rospy.spin()
     else:
         rospy.logerr("Prb in initialization. Bye")
