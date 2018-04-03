@@ -16,6 +16,9 @@ from contact_msgs.msg import EvaluateContactFeedback, EvaluateContactResult
 
 # protected region user include package begin #
 from copy import deepcopy
+from contact_def.ar_contact_set import ContactForceSet
+from contact_def.ar_contact_class import ContactForce
+
 # protected region user include package end #
 
 class ContactEvaluateConfig(object):
@@ -83,6 +86,9 @@ class ContactEvaluateImplementation(object):
         self.active_action = None
         # last cop received
         self.last_cop = None
+
+        # handler for contact description
+        self.contact_set = ContactForceSet()
         # protected region user member variables end #
 
     def configure(self, config):
@@ -180,6 +186,19 @@ class ContactEvaluateImplementation(object):
 
         result.success = True
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
+
+        # initializing a cop definition from the reading
+        contact = ContactForce(goal.contact_label, goal.is_good_contact)
+        # todo convert the cop into a numpy_array
+        if not contact.set_cops(cops):
+            rospy.logerr("Prb while initialising the contact from list")
+            result.success = False
+        # if ok, we characterize the set and add it to the list
+        if not contact.characterize():
+            rospy.logerr("Prb while characterizing the contact")
+            result.success = False
+        self.contact_set.contacts.append(contact)
+
         self.passthrough.as_learn.set_succeeded(result)
         # protected region user implementation of action callback for learn end #
 
@@ -245,8 +264,32 @@ class ContactEvaluateImplementation(object):
         result.is_good = True
         result.confidence = 1.0
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
+
+        # todo decide wether we do transmit a list or an array
+        result.is_good, result.confidence = self.contact_set.evaluate(cops)
+
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
 
     # protected region user additional functions begin #
+
+    def load_set(self, cfg_file):
+        """
+        @brief Loads a set of contact from the data in the configuration file.
+        @param      self The object
+        @param      cfg_file The configuration file
+
+        @return True on success
+        """
+        return self.contact_set.load_contacts(cfg_file)
+
+    def store_set(self, dir_name):
+        """
+        @brief store the contact set
+        @param      self The object
+        @param      dir_name directory into which data is to be stored
+
+        @return True on success
+        """
+        return self.contact_set.store_contacts(dir_name)
     # protected region user additional functions end #

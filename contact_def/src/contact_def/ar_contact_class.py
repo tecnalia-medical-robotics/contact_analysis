@@ -19,12 +19,14 @@ class ContactForce(BasicClass):
     Class related to a contact experiment
     """
 
-    def __init__(self, name="contact", min_force=None):
+    def __init__(self, name="contact", is_good_contact=True, min_force=None):
         """
         Parameters initialization
         """
         # call super class constructor
         super(ContactForce, self).__init__(name)
+        # to know wether the contact is consodered to be good
+        self.is_good_contact_ = True
         # to contain all data, to be a numpy array
         self.data_ = None
         # to contain the cop, numpy array
@@ -77,6 +79,25 @@ class ContactForce(BasicClass):
         self.data_ = wrench_array
         return True
 
+    def set_cops(self, cop_array):
+        """
+        @brief set directly the cop set
+        @param self The object
+        @param cop_array array of cops
+        @return True on sucess
+        """
+
+        self.reset()
+        rows, cols = cop_array.shape
+
+        if cols != 2:
+            self.log_error("input data should have 2 columns")
+            self.log_error("provided: {}".format(cop_array.shape))
+            return False
+
+        self.cop_ = cop_array
+        return True
+
     def compute_cop(self, min_force=None):
         """
         @brief compute The Center of Pressure
@@ -120,13 +141,10 @@ class ContactForce(BasicClass):
 
         return nb_cop
 
-
     def characterize(self):
         """
         @brief characterize the set, computing a svd.
-
         @param      self The object
-
         @return true if the operation succeeded.
         """
 
@@ -192,6 +210,54 @@ class ContactForce(BasicClass):
 
         return [self.cop_mean_, self.sigma_, self.angle_, major_axis, minor_axis]
 
+    def mean_distance(self, x, y):
+        """ Compute euclidean distance to the mean point
+
+        Arguments:
+            x {float} -- 1st coordinate
+            y {float} -- 2nd coordinate
+
+        Returns:
+            [float] -- Computed distance, -1 if can not be computed
+        """
+        if self.cop_mean_ is None:
+            return -1
+        if self.sigma_ is None:
+            return -1
+
+        pt = numpy.array([x, y])
+
+        distance = numpy.linalg.norm(pt - self.cop_mean_)
+
+        return distance
+
+    def sigma_distance(self, x, y):
+        """Compute euclidean distance scaled by the std
+
+        x {float} -- 1st coordinate
+        y {float} -- 2nd coordinate
+
+        Returns:
+            [float] -- Computed distance, -a on error
+        """
+
+        if self.cop_mean_ is None:
+            return -1
+        if self.sigma_ is None:
+            return -1
+
+        pt = numpy.array([x, y]) - self.cop_mean_
+
+        aligned_pt = numpy.dot(pt,  self.sing_vectors_)
+
+
+        sigma_pt = aligned_pt / self.sigma_
+
+        distance = numpy.linalg.norm(sigma_pt)
+
+        return distance
+
+
     def store_data_yaml(self, filename):
         """
         @brief Stores spec into a file.
@@ -220,7 +286,7 @@ class ContactForce(BasicClass):
             cfg['sing_vectors'] = self.sing_vectors_
         cfg['min_force'] = self.min_force_
         cfg['name'] = self.name_
-
+        cfg['is_good_contact'] = self.is_good_contact_
         with open(filename, 'w') as outfile:
             yaml.dump(cfg, outfile, default_flow_style=False)
         return True

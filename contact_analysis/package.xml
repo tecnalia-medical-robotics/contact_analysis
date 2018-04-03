@@ -29,6 +29,8 @@
   <run_depend>actionlib_msgs</run_depend>
 
   <!-- protected region additional package statements begin -->
+  <build_depend>contact_def</build_depend>
+  <run_depend>contact_def</run_depend>
   <!-- protected region additional package statements end -->
 
 </package>

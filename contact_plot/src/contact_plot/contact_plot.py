@@ -110,8 +110,10 @@ class AnimatedContact(object):
             self.anim.event_sources.stop()
             plt.close(self.fig)
             return self.lines
+
         # update the graph
-        # print num
+
+        # todo update it with real cop
         #self.lines.set_data(0.1 + num * 0.005, -0.2)
         self.input.set_data(0.1 + num * 0.005, -0.2)
         #self.cursor.set_data(self.enhanced_graph.xs, self.enhanced_graph.ys)

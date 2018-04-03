@@ -100,6 +100,91 @@ class ContactForceSet(BasicClass):
             self.log("set {} - {} - {}".format(i, item.name_, item.cop_))
         return True
 
+    def store_contacts(self, dir_name, cfg_file = None):
+        """
+        @brief load the contacts
+        @param      self The object
+        @param      cfg_file The configuration file.
+        @return True on sucess
+        """
+        # todo check if this is a dictionary.
+        # if it is load it
+
+        if self.contacts is None:
+            self.log_error("no contact defined. Bye")
+            return False
+
+        if cfg_file is None:
+            cfg_file = "config.yaml"
+            self.log_warn("Config filename set to {}".format(cfg_file))
+
+        # check existence of the path provided
+        if os.path.exists(dir_name) and os.path.isdir(dir_name):
+            self.log_warn("Directory already exist.")
+
+        if not os.path.exists(dir_name):
+            self.log("Crreating the directory {}",format(dir_name))
+            os.makedirs(dir_name)
+
+        filepattern = "contact_{}_picle.yaml"
+
+        for i, item in enumerate(self.contacts):
+            item.dump_object(filepattern.format(i))
+
+        # creating now the config file
+        config = dict()
+        config["filepattern"] = filepattern
+        config["indexes"] = range(len(self.contacts))
+
+        filename = dir_name + "/" + cfg_file
+        with open(filename, 'w') as outfile:
+            yaml.dump(config, outfile, default_flow_style=False)
+
+        return True
+
+    def euclidean_order(self, x, y):
+
+        distances = [contact.mean_distance(x, y) for contact in self.contacts]
+
+        index_ordered = numpy.argsort(distances)
+        self.log("distances: {}".format(distances))
+        self.log("index: {}".format(index_ordered))
+
+        # select the best 3
+        best = list()
+
+        for i in range(3):
+            idx = index_ordered[i]
+            best.append([idx, distances[idx]])
+        return best
+
+    def sigma_order(self, x, y):
+
+        distances = [contact.sigma_distance(x, y) for contact in self.contacts]
+
+        index_ordered = numpy.argsort(distances)
+        self.log("distances: {}".format(distances))
+        self.log("index: {}".format(index_ordered))
+
+        # select the best 3
+        best = list()
+
+        for i in range(3):
+            idx = index_ordered[i]
+            best.append([idx, distances[idx]])
+        return best
+
+    def evaluate(self, lcops):
+        """
+        @brief evaluate a contact defined by a set of cops
+        @param self The object
+        @param lcops list of cops already computed
+        @return is_good, set, confidence
+        """
+        # to be defined...
+        pass
+
+
     def get_graph(self):
         """
         @brief generate the graph of the contacts
