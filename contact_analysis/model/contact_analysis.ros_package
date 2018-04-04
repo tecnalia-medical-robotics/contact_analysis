@@ -38,6 +38,10 @@
             description="frequency at which we will to acquire cop"/>
         <parameter name="obs_duration" type="double" value="1.0"
             description="duration of the recording for learning or recognition (sec)"/>
+        <serviceServer name="load" type="contact_msgs::SetString"
+            description="To load a set of contact definition previously recorded"/>
+        <serviceServer name="store" type="contact_msgs::SetString"
+            description="To store a set of contact definition within a given directory"/>
     </node>
 <depend>geometry_msgs</depend>
 <depend>visualization_msgs</depend>
