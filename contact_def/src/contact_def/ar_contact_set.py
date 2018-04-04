@@ -126,14 +126,14 @@ class ContactForceSet(BasicClass):
         if os.path.exists(dir_name) and os.path.isdir(dir_name):
             self.log_warn("Directory already exist.")
 
-        self.log("Here")
+        # self.log("Here")
         if not os.path.exists(dir_name):
             self.log("Crreating the directory {}".format(dir_name))
             os.makedirs(dir_name)
 
-        self.log("There")
+        # self.log("There")
 
-        filepattern =  "contact_{}_picle.yaml"
+        filepattern = "contact_{}_picle.yaml"
         full_filepattern = dir_name + "/"  + filepattern
         for i, item in enumerate(self.contacts):
             item.dump_object(full_filepattern.format(i))
@@ -203,24 +203,27 @@ class ContactForceSet(BasicClass):
         fig_glob, ax_glob = plt.subplots()
         ax_glob.set_title("Global COP Analysis")
 
-        colors = get_cmap(len(self.contacts) + 1)
+        if self.contacts is None:
+            plt.axis([-0.5, 0.5, -0.5, 0.5])
+        else:
+            colors = get_cmap(len(self.contacts) + 1)
 
-        for i, contact in enumerate(self.contacts):
-            cop = contact.cop_
-            if len(cop) > 0:
-                #ax_glob.plot(cop[:, 0], cop[:, 1], 'o', color=colors(i), label="{}-{}".format(i + 1, labels[i + 1]))
-                ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(i))
+            for i, contact in enumerate(self.contacts):
+                cop = contact.cop_
+                if len(cop) > 0:
+                    #ax_glob.plot(cop[:, 0], cop[:, 1], 'o', color=colors(i), label="{}-{}".format(i + 1, labels[i + 1]))
+                    ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(i))
 
-                [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
+                    [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
 
-                ellipse =Ellipse(cop_mean, width=major_axis,
-                                 height=minor_axis, angle=angle)
-                ellipse.set_color(colors(i))
-                ellipse.set_alpha(0.6)
-                ellipse.set_clip_box(ax_glob.bbox)
-                ax_glob.add_artist(ellipse)
-            else:
-                self.log_warn("No points for {}".format(i+1))
+                    ellipse =Ellipse(cop_mean, width=major_axis,
+                                     height=minor_axis, angle=angle)
+                    ellipse.set_color(colors(i))
+                    ellipse.set_alpha(0.6)
+                    ellipse.set_clip_box(ax_glob.bbox)
+                    ax_glob.add_artist(ellipse)
+                else:
+                    self.log_warn("No points for {}".format(i+1))
         ax_glob.legend()
 
         # import matplotlib.patches as mpatches
