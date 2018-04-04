@@ -51,6 +51,7 @@ class ContactForceSet(BasicClass):
 
         # confirm string is a valid path
         if not os.path.isfile(config_file):
+            self.log_error("File provided does not exist")
             return False
 
         with open(config_file, 'r') as file_c:
@@ -95,9 +96,12 @@ class ContactForceSet(BasicClass):
             contact.load_object(filename)
             self.contacts.append(contact)
 
+        self.log("Loaded {} models".format(len(self.contacts)))
         # check the files loaded
         for i, item in enumerate(self.contacts):
-            self.log("set {} - {} - {}".format(i, item.name_, item.cop_))
+            #self.log("set {} - {} - {}".format(i, item.name_, item.cop_))
+            self.log("set {} - {}".format(i, item.name_))
+
         return True
 
     def store_contacts(self, dir_name, cfg_file = None):
@@ -122,14 +126,17 @@ class ContactForceSet(BasicClass):
         if os.path.exists(dir_name) and os.path.isdir(dir_name):
             self.log_warn("Directory already exist.")
 
+        self.log("Here")
         if not os.path.exists(dir_name):
-            self.log("Crreating the directory {}",format(dir_name))
+            self.log("Crreating the directory {}".format(dir_name))
             os.makedirs(dir_name)
 
-        filepattern = "contact_{}_picle.yaml"
+        self.log("There")
 
+        filepattern =  "contact_{}_picle.yaml"
+        full_filepattern = dir_name + "/"  + filepattern
         for i, item in enumerate(self.contacts):
-            item.dump_object(filepattern.format(i))
+            item.dump_object(full_filepattern.format(i))
 
         # creating now the config file
         config = dict()

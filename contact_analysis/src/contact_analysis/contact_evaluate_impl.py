@@ -141,7 +141,7 @@ class ContactEvaluateImplementation(object):
         """
         result = SetStringResponse()
         # protected region user implementation of service callback for load begin #
-        result.sucess = self.load_set(req.message)
+        result.success = self.load_set(req.message)
         # protected region user implementation of service callback for load end #
         return result
 
@@ -156,7 +156,8 @@ class ContactEvaluateImplementation(object):
         """
         result = SetStringResponse()
         # protected region user implementation of service callback for store begin #
-        result.sucess = self.store_set(req.message)
+        rospy.loginfo("Storing models...")
+        result.success = self.store_set(req.message)
         # protected region user implementation of service callback for store end #
         return result
 
