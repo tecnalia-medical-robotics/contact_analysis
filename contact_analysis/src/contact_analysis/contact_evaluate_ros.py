@@ -16,6 +16,8 @@ from contact_analysis.cfg import contact_evaluateConfig
 
 # ROS message & services includes
 from geometry_msgs.msg import Point
+from contact_msgs.srv import SetString
+from contact_msgs.srv import SetString
 from contact_msgs.msg import LearnContactAction
 from contact_msgs.msg import EvaluateContactAction
 
@@ -38,6 +40,12 @@ class ContactEvaluateROS(object):
 
         srv = Server(contact_evaluateConfig, self.configure_callback)
         self.cop_ = rospy.Subscriber('cop', Point, self.topic_callback_cop)
+        # to enable service name adjustment when loading the node
+        remap = rospy.get_param("~load_remap", "load")
+        self.load_ = rospy.Service(remap, SetString, self.component_implementation_.callback_load)
+        # to enable service name adjustment when loading the node
+        remap = rospy.get_param("~store_remap", "store")
+        self.store_ = rospy.Service(remap, SetString, self.component_implementation_.callback_store)
         # to enable action name adjustment when loading the node
         remap = rospy.get_param("~learn_remap", "learn")
         self.component_implementation_.passthrough.as_learn = actionlib.SimpleActionServer(remap,
@@ -80,7 +88,7 @@ class ContactEvaluateROS(object):
         """
         pass
 
-    def set_all_output_read(self):
+    def set_all_input_read(self):
         """
         set related flag to state that input has been read
         """
@@ -99,7 +107,7 @@ class ContactEvaluateROS(object):
         self.activate_all_output()
         config = deepcopy(self.component_config_)
         data = deepcopy(self.component_data_)
-        self.set_all_output_read()
+        self.set_all_input_read()
         self.component_implementation_.update(data, config)
 
 

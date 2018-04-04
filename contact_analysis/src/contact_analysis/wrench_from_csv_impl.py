@@ -158,7 +158,7 @@ class WrenchFromCsvImplementation(object):
                 self.labels = dict()
 
         # protected region user configure end #
-        return True
+
 
 
     def update(self, data, config):
@@ -193,7 +193,7 @@ class WrenchFromCsvImplementation(object):
         self.marker.text = "data {} {}".format(self.id_wrench, label)
         data.out_data_info.markers = [self.marker]
         # protected region user update end #
-        pass
+
 
     # protected region user additional functions begin #
 def create_marker_text(ns='debug', frame_id='map'):

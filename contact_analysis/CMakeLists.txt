@@ -9,10 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   actionlib
-  dynamic_reconfigure
   contact_msgs
-  actionlib_msgs
   contact_def
+  actionlib_msgs
+  dynamic_reconfigure
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -67,10 +67,10 @@ catkin_package(
     geometry_msgs
     visualization_msgs
     actionlib
-    dynamic_reconfigure
     contact_msgs
-    actionlib_msgs
     contact_def
+    actionlib_msgs
+    dynamic_reconfigure
 )
 
 ###########

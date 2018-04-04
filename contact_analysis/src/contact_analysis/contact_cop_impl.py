@@ -113,8 +113,9 @@ class ContactCopImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
-        # protected region user configure end #
         return True
+        # protected region user configure end #
+
 
 
     def update(self, data, config):
@@ -151,7 +152,7 @@ class ContactCopImplementation(object):
             data.out_marker_cop_active = False
 
         # protected region user update end #
-        pass
+
 
     # protected region user additional functions begin #
 

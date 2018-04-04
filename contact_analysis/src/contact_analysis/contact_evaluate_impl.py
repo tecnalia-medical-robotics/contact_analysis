@@ -11,6 +11,8 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import Point
+from contact_msgs.srv import SetString, SetStringResponse
+from contact_msgs.srv import SetString, SetStringResponse
 from contact_msgs.msg import LearnContactFeedback, LearnContactResult
 from contact_msgs.msg import EvaluateContactFeedback, EvaluateContactResult
 
@@ -106,8 +108,9 @@ class ContactEvaluateImplementation(object):
 
         self.config = deepcopy(config)
         self.active_action = None
-        # protected region user configure end #
         return True
+        # protected region user configure end #
+
 
 
     def update(self, data, config):
@@ -125,7 +128,35 @@ class ContactEvaluateImplementation(object):
         if data.in_cop_updated:
             self.last_cop = deepcopy(data.in_cop)
         # protected region user update end #
-        pass
+
+
+    def callback_load(self, req):
+        """
+        @brief callback of service load
+
+        @param self The object
+        @param req(SetString) input parameter
+
+        @return (SetStringResponse) service output
+        """
+        result = SetStringResponse()
+        # protected region user implementation of service callback for load begin #
+        # protected region user implementation of service callback for load end #
+        return result
+
+    def callback_store(self, req):
+        """
+        @brief callback of service store
+
+        @param self The object
+        @param req(SetString) input parameter
+
+        @return (SetStringResponse) service output
+        """
+        result = SetStringResponse()
+        # protected region user implementation of service callback for store begin #
+        # protected region user implementation of service callback for store end #
+        return result
 
     def callback_learn(self, goal):
         """
@@ -138,23 +169,9 @@ class ContactEvaluateImplementation(object):
         @warning may send some feedback during the task execution
         """
 
-        # to provide feedback during action execution
-        # to send the feedback, one should use:
-        # self.passthrough.as_learn.publish_feedback(feedback)
-        feedback = LearnContactFeedback()
-        # to contain the outcome of the task at completion
-        # to send the result, one should use:
-        # on suceess:
-        # self.passthrough.as_learn.set_succeeded(result)
-        result = LearnContactResult()
-        # Remind that preemption request should be checked during action execution:
-        # if self.passthrough.as_learn.is_preempt_requested():
-        #        rospy.loginfo('Preempted action learn')
-        #        self.passthrough.as_learn.set_preempted()
-        #        success = False
-        #        break
-
         # protected region user implementation of action callback for learn begin #
+        feedback = LearnContactFeedback()
+        result = LearnContactResult()
         rospy.loginfo("Received goal: {}".format(goal))
 
         if goal.frequency == 0:
@@ -213,24 +230,9 @@ class ContactEvaluateImplementation(object):
         @warning may send some feedback during the task execution
         """
 
-        # to provide feedback during action execution
-        # to send the feedback, one should use:
-        # self.passthrough.as_evaluate.publish_feedback(feedback)
-        feedback = EvaluateContactFeedback()
-        # to contain the outcome of the task at completion
-        # to send the result, one should use:
-        # on suceess:
-        # self.passthrough.as_evaluate.set_succeeded(result)
-        result = EvaluateContactResult()
-        # Remind that preemption request should be checked during action execution:
-        # if self.passthrough.as_evaluate.is_preempt_requested():
-        #        rospy.loginfo('Preempted action evaluate')
-        #        self.passthrough.as_evaluate.set_preempted()
-        #        success = False
-        #        break
-
         # protected region user implementation of action callback for evaluate begin #
-
+        feedback = EvaluateContactFeedback()
+        result = EvaluateContactResult()
         rospy.loginfo("Received goal: {}".format(goal))
 
         if goal.frequency == 0:
