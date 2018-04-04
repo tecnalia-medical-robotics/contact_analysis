@@ -20,6 +20,8 @@
             description="csv file containing wrench information to publish"/>
         <parameter name="inc" type="int" value="1"
             description="from the wrench measure, increment applied at each publication loop"/>
+        <parameter name="is_loop" type="bool" value="True"
+            description="Wether we loop over the data"/>
         <parameter name="slice_file" type="std::string" value="Undef"
             description="file containing a list of relevant slices"/>
         <parameter name="label_file" type="std::string" value="Undef"

@@ -74,6 +74,10 @@ csv file containing wrench information to publish
 <!--- protected region param inc begin -->
 from the wrench measure, increment applied at each publication loop
 <!--- protected region param inc end -->
+`is_loop` *(bool, default: True)*
+<!--- protected region param is_loop begin -->
+Wether we loop over the data
+<!--- protected region param is_loop end -->
 `slice_file` *(std::string, default: "Undef")*
 <!--- protected region param slice_file begin -->
 file containing a list of relevant slices

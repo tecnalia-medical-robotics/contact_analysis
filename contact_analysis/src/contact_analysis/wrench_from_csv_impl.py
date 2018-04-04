@@ -28,6 +28,7 @@ class WrenchFromCsvConfig(object):
     def __init__(self):
         self.csv_file = "Undef"
         self.inc = 1
+        self.is_loop = True
         self.slice_file = "Undef"
         self.label_file = "Undef"
         pass
@@ -36,6 +37,7 @@ class WrenchFromCsvConfig(object):
         msg = "Instance of WrenchFromCsvConfig class: {"
         msg += "csv_file: {} ".format(self.csv_file)
         msg += "inc: {} ".format(self.inc)
+        msg += "is_loop: {} ".format(self.is_loop)
         msg += "slice_file: {} ".format(self.slice_file)
         msg += "label_file: {} ".format(self.label_file)
         msg += "}"

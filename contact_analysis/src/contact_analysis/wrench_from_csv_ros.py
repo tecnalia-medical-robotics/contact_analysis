@@ -44,6 +44,7 @@ class WrenchFromCsvROS(object):
         """
         self.component_config_.csv_file = config.csv_file
         self.component_config_.inc = config.inc
+        self.component_config_.is_loop = config.is_loop
         self.component_config_.slice_file = config.slice_file
         self.component_config_.label_file = config.label_file
         return config
