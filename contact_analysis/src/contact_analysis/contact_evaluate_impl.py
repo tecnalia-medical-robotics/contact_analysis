@@ -141,6 +141,7 @@ class ContactEvaluateImplementation(object):
         """
         result = SetStringResponse()
         # protected region user implementation of service callback for load begin #
+        result.sucess = self.load_set(req.message)
         # protected region user implementation of service callback for load end #
         return result
 
@@ -155,6 +156,7 @@ class ContactEvaluateImplementation(object):
         """
         result = SetStringResponse()
         # protected region user implementation of service callback for store begin #
+        result.sucess = self.store_set(req.message)
         # protected region user implementation of service callback for store end #
         return result
 
@@ -192,9 +194,9 @@ class ContactEvaluateImplementation(object):
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_learn.is_preempt_requested():
-               rospy.loginfo('%s: Preempted action as_learn')
-               self.passthrough.as_learn.set_preempted()
-               break
+                rospy.loginfo('%s: Preempted action as_learn')
+                self.passthrough.as_learn.set_preempted()
+                break
 
             cops.append(self.last_cop)
             feedback.sample_number += 1
@@ -253,9 +255,9 @@ class ContactEvaluateImplementation(object):
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_evaluate.is_preempt_requested():
-               rospy.loginfo('%s: Preempted action as_evaluate')
-               self.passthrough.as_evaluate.set_preempted()
-               break
+                rospy.loginfo('%s: Preempted action as_evaluate')
+                self.passthrough.as_evaluate.set_preempted()
+                break
 
             cops.append(self.last_cop)
             feedback.sample_number += 1
