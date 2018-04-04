@@ -44,6 +44,10 @@
             description="To load a set of contact definition previously recorded"/>
         <serviceServer name="store" type="contact_msgs::SetString"
             description="To store a set of contact definition within a given directory"/>
+        <directPublisher name="plot_learn_contact" type="contact_msgs::PointArray"
+            description="set of cops used to define the latest contact"/>
+        <directPublisher name="plot_evaluate_contact" type="contact_msgs::PointArray"
+            description="Contact to be evaluated"/>
     </node>
 <depend>geometry_msgs</depend>
 <depend>visualization_msgs</depend>

@@ -16,6 +16,8 @@ from contact_analysis.cfg import contact_evaluateConfig
 
 # ROS message & services includes
 from geometry_msgs.msg import Point
+from contact_msgs.msg import PointArray
+from contact_msgs.msg import PointArray
 from contact_msgs.srv import SetString
 from contact_msgs.srv import SetString
 from contact_msgs.msg import LearnContactAction
@@ -40,6 +42,9 @@ class ContactEvaluateROS(object):
 
         srv = Server(contact_evaluateConfig, self.configure_callback)
         self.cop_ = rospy.Subscriber('cop', Point, self.topic_callback_cop)
+        # Handling direct publisher
+        self.component_implementation_.passthrough.pub_plot_learn_contact = rospy.Publisher('plot_learn_contact', PointArray, queue_size=1)
+        self.component_implementation_.passthrough.pub_plot_evaluate_contact = rospy.Publisher('plot_evaluate_contact', PointArray, queue_size=1)
         # to enable service name adjustment when loading the node
         remap = rospy.get_param("~load_remap", "load")
         self.load_ = rospy.Service(remap, SetString, self.component_implementation_.callback_load)

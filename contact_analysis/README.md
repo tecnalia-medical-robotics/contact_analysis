@@ -176,3 +176,17 @@ to learn a new contact
 to evaluate a contact taking place
 <!--- protected region action server evaluate end -->
 
+## Direct Publishers
+
+These publishers are not handled through the update loop.
+Their publication frequency is thus unknown
+
+`plot_learn_contact` *(contact_msgs::PointArray)*
+<!--- protected region direct publisher plot_learn_contact begin -->
+set of cops used to define the latest contact
+<!--- protected region direct publisher plot_learn_contact end -->
+`plot_evaluate_contact` *(contact_msgs::PointArray)*
+<!--- protected region direct publisher plot_evaluate_contact begin -->
+Contact to be evaluated
+<!--- protected region direct publisher plot_evaluate_contact end -->
+

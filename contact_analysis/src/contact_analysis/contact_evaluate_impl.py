@@ -11,6 +11,8 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import Point
+from contact_msgs.msg import PointArray
+from contact_msgs.msg import PointArray
 from contact_msgs.srv import SetString, SetStringResponse
 from contact_msgs.srv import SetString, SetStringResponse
 from contact_msgs.msg import LearnContactFeedback, LearnContactResult
@@ -71,6 +73,8 @@ class ContactEvaluatePassthrough(object):
         """
         self.as_learn = None
         self.as_evaluate = None
+        self.pub_plot_learn_contact = None
+        self.pub_plot_evaluate_contact = None
         pass
 
 class ContactEvaluateImplementation(object):
