@@ -205,8 +205,8 @@ class ContactForce(BasicClass):
         # should be aligned with Chi Square probabilities
         # see https://people.richland.edu/james/lecture/m170/tbl-chi.html
         s_chi = stats.chi2.isf(1.0 - within, 2)
-        major_axis = 2.0 * math.sqrt(s_chi) * self.sigma_.max();
-        minor_axis = 2.0 * math.sqrt(s_chi) * self.sigma_.min();
+        major_axis = 2.0 * math.sqrt(s_chi) * self.sigma_.max()
+        minor_axis = 2.0 * math.sqrt(s_chi) * self.sigma_.min()
 
         return [self.cop_mean_, self.sigma_, self.angle_, major_axis, minor_axis]
 

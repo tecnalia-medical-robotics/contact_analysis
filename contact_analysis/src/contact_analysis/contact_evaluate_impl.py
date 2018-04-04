@@ -204,7 +204,8 @@ class ContactEvaluateImplementation(object):
                 break
 
             # rospy.loginfo("Adding cop {}: {}".format(len(cops), self.last_cop))
-            cops.append([self.last_cop.x, self.last_cop.y])
+            # cops.append([self.last_cop.x, self.last_cop.y])
+            cops.append(self.last_cop)
             feedback.sample_number += 1
             self.passthrough.as_learn.publish_feedback(feedback)
             rate.sleep()
@@ -214,7 +215,12 @@ class ContactEvaluateImplementation(object):
 
         # initializing a cop definition from the reading
         contact = ContactForce(goal.contact_label, goal.is_good_contact)
-        cops_array = numpy.asarray(cops)
+        cop_list = [[p.x, p.y] for p in cops]
+        cops_array = numpy.asarray(cop_list)
+
+        point_array = PointArray()
+        point_array.points = cops
+        self.passthrough.pub_plot_learn_contact.publish(point_array)
         # rospy.loginfo("cop_array shape: {}".format(cops_array.shape))
         # todo convert the cop into a numpy_array
         if not contact.set_cops(cops_array):

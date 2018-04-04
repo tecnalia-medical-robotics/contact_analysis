@@ -11,14 +11,17 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
 import rospy
+import numpy
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+
 import matplotlib.animation as animation
 from contact_def.ar_contact_set import ContactForceSet
-
+from contact_def.ar_contact_class import ContactForce
 from geometry_msgs.msg import Point
 from contact_msgs.srv import SetString
 from contact_msgs.srv import SetString, SetStringResponse
-
+from contact_msgs.msg import PointArray
 
 # original example provided at page:
 # https://matplotlib.org/users/event_handling.html
@@ -104,6 +107,13 @@ class AnimatedContact(object):
         # initializa interaction tools
 
         self.input, = self.ax.plot([0.1], [-0.2], 'o', color='b')
+        self.learn_cop, = self.ax.plot([],[], '.')
+        self.ellipse_learn = Ellipse([0,0], 0, 0, 0)
+        self.evaluate_cop, = self.ax.plot([],[], '.')
+        self.ellipse_eval = Ellipse([0,0], 0, 0, 0)
+        
+        self.ax.add_artist(self.ellipse_learn)
+        self.ax.add_artist(self.ellipse_eval)
 
         self.cursor, = self.ax.plot([0], [0], 'o')  # empty line
         self.text_cb = self.ax.text(0.05, 0.09, 'sel: none',
@@ -113,7 +123,9 @@ class AnimatedContact(object):
 
         self.enhanced_graph = EnhancedGraph(self.cursor, self.text_cursor)
 
-        self.lines = [self.input, self.cursor, self.text_cursor, self.text_cb]
+        self.lines = [self.input, self.cursor, self.text_cursor,
+                      self.text_cb, self.learn_cop, self.ellipse_learn,
+                      self.evaluate_cop, self.ellipse_learn]
 
     def topic_callback_cop(self, msg):
         """
@@ -123,6 +135,32 @@ class AnimatedContact(object):
         """
         # rospy.loginfo("Received msg: {}".format(msg))
         self.last_cop = msg
+
+    def topic_callback_learn(self, msg):
+        """
+        @brief ros callback on message
+        @param self the object
+        @param msg received message [geometry_msgs/Point]
+        """
+        rospy.loginfo("Received {} cops".format(len(msg.points)))
+
+        cops = [[p.x, p.y] for p in msg.points]
+        cop_array = numpy.asarray(cops)
+
+        contact = ContactForce("learned cop", True)
+        if not contact.set_cops(cop_array):
+            rospy.logerr("Prb while initializing the contact")
+        if not contact.characterize():
+            rospy.logerr("Prb while characterizing the contact")
+
+        [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
+
+        self.ellipse_learn.center = cop_mean
+        self.ellipse_learn.width = major_axis
+        self.ellipse_learn.height = minor_axis
+        self.ellipse_learn.angle = angle
+        self.ellipse_learn.set_alpha(0.4)
+        self.learn_cop.set_data(cop_array[:, 0], cop_array[:, 1])
 
     def animation_loop(self, num):
         """
@@ -180,6 +218,7 @@ class AnimatedContact(object):
         """
 
         self.sub_cop = rospy.Subscriber('cop', Point, self.topic_callback_cop)
+        self.sub_learn = rospy.Subscriber('plot_learn_contact', PointArray, self.topic_callback_learn)
 
         while True:
             if rospy.is_shutdown():
