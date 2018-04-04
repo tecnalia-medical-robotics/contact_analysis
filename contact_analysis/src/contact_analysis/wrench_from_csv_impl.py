@@ -93,7 +93,7 @@ class WrenchFromCsvImplementation(object):
         self.id_wrench = -1
         self.marker = create_marker_text("ref", "map")
         self.slices = list()
-        self.label = dict()
+        self.labels = dict()
         # protected region user member variables end #
 
     def configure(self, config):
@@ -137,7 +137,7 @@ class WrenchFromCsvImplementation(object):
 
         rospy.loginfo("Loaded {} wrenches".format(len(self.wrenches)))
 
-        if config.slice_file != "undef":
+        if (config.slice_file != "undef") and (config.slice_file != "Undef"):
             rospy.loginfo("Loading slice file")
             try:
                 with open(config.slice_file) as f:
@@ -147,7 +147,7 @@ class WrenchFromCsvImplementation(object):
                 rospy.logerr("Error: {}".format(error))
                 self.slices = list()
 
-        if config.label_file != "undef":
+        if (config.label_file != "undef") and (config.label_file != "Undef"):
             rospy.loginfo("Loading label file")
             try:
                 with open(config.label_file) as f:
@@ -157,6 +157,7 @@ class WrenchFromCsvImplementation(object):
                 rospy.logerr("Error: {}".format(error))
                 self.labels = dict()
 
+        return True
         # protected region user configure end #
 
 

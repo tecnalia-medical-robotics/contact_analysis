@@ -13,9 +13,8 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 import rospy
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import os
-import yaml
 from contact_def.ar_contact_set import ContactForceSet
+from geometry_msgs.msg import Point
 
 
 # original example provided at page:
@@ -32,7 +31,8 @@ class EnhancedGraph(object):
 
     def __call__(self, event):
         # print('click', event)
-        if event.inaxes!=self.line.axes: return
+        if event.inaxes != self.line.axes:
+            return
         self.xs.append(event.xdata)
         self.ys.append(event.ydata)
         #self.line.set_data(self.xs, self.ys)
@@ -57,7 +57,10 @@ class AnimatedContact(object):
         self.contact_set = ContactForceSet()
         # config file
         self.cfg = None
-
+        # to get the current cop measurement.
+        self.sub_cop = None
+        # to contain the last cop received
+        self.last_cop = None
         # set of needed structures for graph management.
         # figure handler
         self.fig = None
@@ -71,10 +74,10 @@ class AnimatedContact(object):
     def load_data(self, cfg_file):
 
         if not self.contact_set.set_cfg_file(cfg_file):
-            rospy.log_error("Prb wile setting cfg file")
+            rospy.logerr("Prb wile setting cfg file")
             return False
         if not self.contact_set.load_contacts():
-            rospy.log_error("Prb while loading data")
+            rospy.logerr("Prb while loading data")
             return False
 
         return True
@@ -97,6 +100,16 @@ class AnimatedContact(object):
 
         self.lines = [self.input, self.cursor, self.text]
 
+    def topic_callback_cop(self, msg):
+        """
+        @brief ros callback on message
+        @param self the object
+        @param msg received message [geometry_msgs/Point]
+        """
+        rospy.loginfo("Received msg: {}".format(msg))
+        self.last_cop = msg
+
+
     def animation_loop(self, num):
         """
         @brief looping function automatically called by the animation process
@@ -115,7 +128,8 @@ class AnimatedContact(object):
 
         # todo update it with real cop
         #self.lines.set_data(0.1 + num * 0.005, -0.2)
-        self.input.set_data(0.1 + num * 0.005, -0.2)
+        if self.last_cop is not None:
+            self.input.set_data(self.last_cop.x, self.last_cop.y)
         #self.cursor.set_data(self.enhanced_graph.xs, self.enhanced_graph.ys)
 
         # done
@@ -128,6 +142,8 @@ class AnimatedContact(object):
         @param      self The object
 
         """
+
+        self.sub_cop = rospy.Subscriber('cop', Point, self.topic_callback_cop)
 
         try:
             # todo check the frames parameter
