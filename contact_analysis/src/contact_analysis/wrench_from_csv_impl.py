@@ -16,6 +16,7 @@ from visualization_msgs.msg import MarkerArray
 # protected region user include package begin #
 import csv
 import numpy
+import sys
 from visualization_msgs.msg import Marker
 import simplejson
 # protected region user include package end #
@@ -178,10 +179,15 @@ class WrenchFromCsvImplementation(object):
         # rospy.loginfo("Check : inc is {} ".format(config.inc))
         self.id_wrench += config.inc
         if self.id_wrench >= len(self.wrenches):
-            rospy.loginfo("Published all wrenches, looping at next iteration")
-            self.id_wrench = - config.inc
-            data.out_wrench_active = False
-            return
+            if config.is_loop:
+                rospy.loginfo("Published all wrenches, looping at next iteration")
+                self.id_wrench = - config.inc
+                data.out_wrench_active = False
+                return
+            else:
+                rospy.logwarn("Quitting the node")
+                #todo: this is not satisfactory...
+                sys.exit()
         wrench = self.wrenches[self.id_wrench]
         wrench.header.stamp = rospy.get_rostime()
         data.out_wrench = wrench

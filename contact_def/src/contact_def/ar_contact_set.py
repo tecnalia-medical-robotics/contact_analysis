@@ -35,7 +35,7 @@ class ContactForceSet(BasicClass):
         super(ContactForceSet, self).__init__(name)
 
         # to contain the list of contacts
-        self.contacts = None
+        self.contacts = list()
         # to contain the configuration file
         self.cfg = None
 
@@ -114,7 +114,7 @@ class ContactForceSet(BasicClass):
         # todo check if this is a dictionary.
         # if it is load it
 
-        if self.contacts is None:
+        if not self.contacts:
             self.log_error("no contact defined. Bye")
             return False
 
@@ -203,7 +203,7 @@ class ContactForceSet(BasicClass):
         fig_glob, ax_glob = plt.subplots()
         ax_glob.set_title("Global COP Analysis")
 
-        if self.contacts is None:
+        if not self.contacts:
             plt.axis([-0.5, 0.5, -0.5, 0.5])
         else:
             colors = get_cmap(len(self.contacts) + 1)

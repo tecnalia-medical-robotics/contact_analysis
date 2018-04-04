@@ -20,7 +20,7 @@ from contact_msgs.msg import EvaluateContactFeedback, EvaluateContactResult
 from copy import deepcopy
 from contact_def.ar_contact_set import ContactForceSet
 from contact_def.ar_contact_class import ContactForce
-
+import numpy
 # protected region user include package end #
 
 class ContactEvaluateConfig(object):
@@ -199,7 +199,8 @@ class ContactEvaluateImplementation(object):
                 self.passthrough.as_learn.set_preempted()
                 break
 
-            cops.append(self.last_cop)
+            # rospy.loginfo("Adding cop {}: {}".format(len(cops), self.last_cop))
+            cops.append([self.last_cop.x, self.last_cop.y])
             feedback.sample_number += 1
             self.passthrough.as_learn.publish_feedback(feedback)
             rate.sleep()
@@ -209,8 +210,10 @@ class ContactEvaluateImplementation(object):
 
         # initializing a cop definition from the reading
         contact = ContactForce(goal.contact_label, goal.is_good_contact)
+        cops_array = numpy.asarray(cops)
+        # rospy.loginfo("cop_array shape: {}".format(cops_array.shape))
         # todo convert the cop into a numpy_array
-        if not contact.set_cops(cops):
+        if not contact.set_cops(cops_array):
             rospy.logerr("Prb while initialising the contact from list")
             result.success = False
         # if ok, we characterize the set and add it to the list
@@ -260,7 +263,7 @@ class ContactEvaluateImplementation(object):
                 self.passthrough.as_evaluate.set_preempted()
                 break
 
-            cops.append(self.last_cop)
+            cops.append([self.last_cop.x, self.last_cop.y])
             feedback.sample_number += 1
             self.passthrough.as_evaluate.publish_feedback(feedback)
             rate.sleep()
@@ -269,9 +272,9 @@ class ContactEvaluateImplementation(object):
         result.is_good = True
         result.confidence = 1.0
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
-
+        cops_array = numpy.asarray(cops)
         # todo decide wether we do transmit a list or an array
-        result.is_good, result.confidence = self.contact_set.evaluate(cops)
+        result.is_good, result.confidence = self.contact_set.evaluate(cop_array)
 
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
