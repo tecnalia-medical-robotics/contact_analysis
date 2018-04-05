@@ -222,7 +222,7 @@ class ContactEvaluateImplementation(object):
         point_array.points = cops
         self.passthrough.pub_plot_learn_contact.publish(point_array)
         # rospy.loginfo("cop_array shape: {}".format(cops_array.shape))
-        # todo convert the cop into a numpy_array
+
         if not contact.set_cops(cops_array):
             rospy.logerr("Prb while initialising the contact from list")
             result.success = False
@@ -273,19 +273,30 @@ class ContactEvaluateImplementation(object):
                 self.passthrough.as_evaluate.set_preempted()
                 break
 
-            cops.append([self.last_cop.x, self.last_cop.y])
+            cops.append(self.last_cop)
+
             feedback.sample_number += 1
             self.passthrough.as_evaluate.publish_feedback(feedback)
             rate.sleep()
 
+        rospy.loginfo("{} cops stored".format(feedback.sample_number))
+        
+        # initializing a cop definition from the reading
+        contact = ContactForce(goal.contact_label, goal.is_good_contact)
+        cop_list = [[p.x, p.y] for p in cops]
+        cops_array = numpy.asarray(cop_list)
+
+        point_array = PointArray()
+        point_array.points = cops
+        self.passthrough.pub_plot_evaluate_contact.publish(point_array)
+
+
         result.success = True
         result.is_good = True
         result.confidence = 1.0
-        rospy.loginfo("{} cops stored".format(feedback.sample_number))
-        cops_array = numpy.asarray(cops)
-        # todo decide wether we do transmit a list or an array
-        result.is_good, result.confidence = self.contact_set.evaluate(cop_array)
 
+        result.is_good, result.confidence = self.contact_set.evaluate(cops_array)
+        
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
 

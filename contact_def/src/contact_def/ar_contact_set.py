@@ -204,7 +204,8 @@ class ContactForceSet(BasicClass):
         ax_glob.set_title("Global COP Analysis")
 
         if not self.contacts:
-            plt.axis([-0.5, 0.5, -0.5, 0.5])
+            #plt.axis([-0.5, 0.5, -0.5, 0.5])
+            plt.axis([-2, 2, -2, 2])
         else:
             colors = get_cmap(len(self.contacts) + 1)
 
@@ -212,7 +213,7 @@ class ContactForceSet(BasicClass):
                 cop = contact.cop_
                 if len(cop) > 0:
                     #ax_glob.plot(cop[:, 0], cop[:, 1], 'o', color=colors(i), label="{}-{}".format(i + 1, labels[i + 1]))
-                    ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(i))
+                    ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(contact.name_))
 
                     [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
 
@@ -224,7 +225,8 @@ class ContactForceSet(BasicClass):
                     ax_glob.add_artist(ellipse)
                 else:
                     self.log_warn("No points for {}".format(i+1))
-        ax_glob.legend()
+        #if self.contacts:
+        #    ax_glob.legend()
 
         # import matplotlib.patches as mpatches
         # texts = ["Exp {}".format(i + 1) for i in range(5)]
@@ -234,7 +236,8 @@ class ContactForceSet(BasicClass):
         ax_glob.set_xlabel("x[mm]")
         ax_glob.set_ylabel("y[mm]")
         ax_glob.grid()
-        ax_glob.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=3, fancybox=True, shadow=True)
+        if self.contacts:
+            ax_glob.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=3, fancybox=True, shadow=True)
 
         return fig_glob, ax_glob
 

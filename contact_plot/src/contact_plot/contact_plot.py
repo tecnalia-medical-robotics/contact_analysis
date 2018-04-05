@@ -81,7 +81,7 @@ class AnimatedContact(object):
         if result.success:
             rospy.logwarn("Stopping animation")
             self.anim.event_source.stop()
-            plt.close(self.fig)
+            #plt.close(self.fig)
         else:
             rospy.logerr("Could not update the contact set")
         return result
@@ -111,7 +111,7 @@ class AnimatedContact(object):
         self.ellipse_learn = Ellipse([0,0], 0, 0, 0)
         self.evaluate_cop, = self.ax.plot([],[], '.')
         self.ellipse_eval = Ellipse([0,0], 0, 0, 0)
-        
+
         self.ax.add_artist(self.ellipse_learn)
         self.ax.add_artist(self.ellipse_eval)
 
