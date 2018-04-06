@@ -138,6 +138,7 @@ rosrun actionlib axclient.py /evaluate
 
 When `contact_plot` is loaded, any new contact set (through learning or evaluation) is transmitted by `contact_evaluation` and displayed in the plot.
 
+
 ## The following would need to be revised.
 
 **Checking the good installation**
