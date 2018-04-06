@@ -1,0 +1,22 @@
+# action called to trigger the evaluation of the current contact
+# frequency at which the cop should be looked for
+# if unset or 0, default config value used
+int32 frequency
+# duration (s) of the recording
+# if unset or 0, default config value used
+float32 learning_duration
+---
+# result definition (likely to be extended)
+bool success
+# most probable contact (good vs bad)
+bool is_good
+# confidence (0 to 1)
+float32 confidence
+# label of the most probable blob
+string blob_label
+# id of the modt probable blob
+int32 blob_id
+---
+# feedback
+# number of sample currently accumulated
+int32 sample_number

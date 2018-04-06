@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-@package contact_cop
-@file wrench_from_csv_ros.py
+@package contact_analysis
+@file contact_cop_ros.py
 @author Anthony Remazeilles
 @brief Analysis of the Center of Pressure related to contact points
 
@@ -11,18 +11,19 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from dynamic_reconfigure.server import Server
-from contact_cop.cfg import wrench_from_csvConfig
+from contact_analysis.cfg import contact_copConfig
 
 # ROS message & services includes
+from geometry_msgs.msg import Point
+from visualization_msgs.msg import MarkerArray
 from geometry_msgs.msg import WrenchStamped
-from std_msgs.msg import Bool
 
 # other includes
-from contact_cop import wrench_from_csv_impl
+from contact_analysis import contact_cop_impl
 from copy import deepcopy
 
 # todo set a function to write correctly the name
-class roswrench_from_csv(object):
+class ContactCopROS(object):
     """
     ROS interface class, handling all communication with ROS
     """
@@ -30,19 +31,27 @@ class roswrench_from_csv(object):
         """
         Attributes definition
         """
-        self.component_data_ = wrench_from_csv_impl.wrench_from_csvData()
-        self.component_config_ = wrench_from_csv_impl.wrench_from_csvConfig()
-        self.component_implementation_ = wrench_from_csv_impl.wrench_from_csvImplementation()
+        self.component_data_ = contact_cop_impl.ContactCopData()
+        self.component_config_ = contact_cop_impl.ContactCopConfig()
+        self.component_implementation_ = contact_cop_impl.ContactCopImplementation()
 
-        srv = Server(wrench_from_csvConfig, self.configure_callback)
-        self.wrench_ = rospy.Publisher('wrench', WrenchStamped, queue_size=1)
-        self.loop_ = rospy.Publisher('loop', Bool, queue_size=1)
+        srv = Server(contact_copConfig, self.configure_callback)
+        self.cop_ = rospy.Publisher('cop', Point, queue_size=1)
+        self.marker_cop_ = rospy.Publisher('marker_cop', MarkerArray, queue_size=1)
+        self.wrench_ = rospy.Subscriber('wrench', WrenchStamped, self.topic_callback_wrench)
+
+    def topic_callback_wrench(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_wrench = msg
+        self.component_data_.in_wrench_updated = True
 
     def configure_callback(self, config, level):
         """
         callback on the change of parameters dynamically adjustable
         """
-        self.component_config_.csv_file = config.csv_file
+        self.component_config_.force_th = config.force_th
         return config
 
     def configure(self):
@@ -55,14 +64,15 @@ class roswrench_from_csv(object):
         """
         activate all defined output
         """
-        self.component_data_.out_wrench_active = True
-        self.component_data_.out_loop_active = True
+        self.component_data_.out_cop_active = True
+        self.component_data_.out_marker_cop_active = True
         pass
 
     def set_all_output_read(self):
         """
         set related flag to state that input has been read
         """
+        self.component_data_.in_wrench_updated = False
         pass
 
     def update(self, event):
@@ -81,14 +91,14 @@ class roswrench_from_csv(object):
         self.component_implementation_.update(data, config)
 
         try:
-            self.component_data_.out_wrench_active = data.out_wrench_active
-            self.component_data_.out_wrench = data.out_wrench
-            if self.component_data_.out_wrench_active:
-                self.wrench_.publish(self.component_data_.out_wrench)
-            self.component_data_.out_loop_active = data.out_loop_active
-            self.component_data_.out_loop = data.out_loop
-            if self.component_data_.out_loop_active:
-                self.loop_.publish(self.component_data_.out_loop)
+            self.component_data_.out_cop_active = data.out_cop_active
+            self.component_data_.out_cop = data.out_cop
+            if self.component_data_.out_cop_active:
+                self.cop_.publish(self.component_data_.out_cop)
+            self.component_data_.out_marker_cop_active = data.out_marker_cop_active
+            self.component_data_.out_marker_cop = data.out_marker_cop
+            if self.component_data_.out_marker_cop_active:
+                self.marker_cop_.publish(self.component_data_.out_marker_cop)
         except rospy.ROSException as error:
             rospy.logerr("Exception: {}".format(error))
 
@@ -99,14 +109,14 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("wrench_from_csv", anonymous=True)
+    rospy.init_node("contact_cop", anonymous=True)
 
-    node = roswrench_from_csv()
+    node = ContactCopROS()
     if not node.configure():
         rospy.logfatal("Could not configure the node")
         rospy.logfatal("Please check configuration parameters")
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 20), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 1000), node.update)
     rospy.spin()

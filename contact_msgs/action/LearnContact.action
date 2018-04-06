@@ -1,0 +1,19 @@
+# action called for learning a new contact during a given period
+# frequency at which the cop should be looked for
+# if unset or 0, default config value used
+int32 frequency
+# duration (s) of the recording
+# if unset or 0, default config value used
+float32 learning_duration
+# whether the current contact is considered to be good or bad
+bool is_good_contact
+# text label of the current contact
+string contact_label
+---
+# result definition (likely to be extended)
+bool success
+---
+# feedback
+# number of sample currently accumulated
+int32 sample_number
+
