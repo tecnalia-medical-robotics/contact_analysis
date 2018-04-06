@@ -74,6 +74,10 @@ csv file containing wrench information to publish
 <!--- protected region param inc begin -->
 from the wrench measure, increment applied at each publication loop
 <!--- protected region param inc end -->
+`is_loop` *(bool, default: True)*
+<!--- protected region param is_loop begin -->
+Wether we loop over the data
+<!--- protected region param is_loop end -->
 `slice_file` *(std::string, default: "Undef")*
 <!--- protected region param slice_file begin -->
 file containing a list of relevant slices
@@ -132,6 +136,23 @@ rosrun contact_analysis contact_evaluate [old_name]:=[new_name]
 computed cop
 <!--- protected region subscriber cop end -->
 
+## Services proposed
+
+A remapping of the service name is made possible at node launch:
+
+```
+rosrun contact_analysis contact_evaluate _[old_name]_remap:=/[new_name]
+```
+
+`load` *(contact_msgs::SetString)*
+<!--- protected region service server load begin -->
+To load a set of contact definition previously recorded
+<!--- protected region service server load end -->
+`store` *(contact_msgs::SetString)*
+<!--- protected region service server store begin -->
+To store a set of contact definition within a given directory
+<!--- protected region service server store end -->
+
 ## Action proposed
 
 A simple action launched can be obtained with:
@@ -154,4 +175,18 @@ to learn a new contact
 <!--- protected region action server evaluate begin -->
 to evaluate a contact taking place
 <!--- protected region action server evaluate end -->
+
+## Direct Publishers
+
+These publishers are not handled through the update loop.
+Their publication frequency is thus unknown
+
+`plot_learn_contact` *(contact_msgs::PointArray)*
+<!--- protected region direct publisher plot_learn_contact begin -->
+set of cops used to define the latest contact
+<!--- protected region direct publisher plot_learn_contact end -->
+`plot_evaluate_contact` *(contact_msgs::PointArray)*
+<!--- protected region direct publisher plot_evaluate_contact begin -->
+Contact to be evaluated
+<!--- protected region direct publisher plot_evaluate_contact end -->
 

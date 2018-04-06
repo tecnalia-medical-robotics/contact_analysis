@@ -9,12 +9,15 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   actionlib
-  dynamic_reconfigure
   contact_msgs
+  contact_def
   actionlib_msgs
+  dynamic_reconfigure
 )
 
 # protected region additional user defined REQUIREMENTS begin #
+# todo how to add dependencies after creation?
+
 # protected region additional user defined REQUIREMENTS end #
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -64,9 +67,10 @@ catkin_package(
     geometry_msgs
     visualization_msgs
     actionlib
-    dynamic_reconfigure
     contact_msgs
+    contact_def
     actionlib_msgs
+    dynamic_reconfigure
 )
 
 ###########

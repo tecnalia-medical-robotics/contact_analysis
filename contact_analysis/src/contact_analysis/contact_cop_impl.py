@@ -113,8 +113,9 @@ class ContactCopImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
-        # protected region user configure end #
         return True
+        # protected region user configure end #
+
 
 
     def update(self, data, config):
@@ -136,9 +137,12 @@ class ContactCopImplementation(object):
 
         force_norm = numpy.linalg.norm(force)
 
+        #config.force_th = 5.0
+        #rospy.logerr("th: {}".format(config.force_th))
         if force_norm > config.force_th and force[2] != 0:
-            data.out_cop.x = - torque[1] / force[2]
-            data.out_cop.y = torque[0] / force[2]
+            rospy.loginfo("Norm: {}".format(force_norm))
+            data.out_cop.x = - (torque[1] + 0.005* force[0]) / force[2]
+            data.out_cop.y = (torque[0] + 0.005* force[1]) / force[2]
             data.out_cop.z = 0.0
 
             self.marker.points = list()
@@ -147,11 +151,13 @@ class ContactCopImplementation(object):
 
             data.out_marker_cop.markers = [self.marker]
         else:
+            rospy.logwarn("Norm: {}".format(force_norm))
+
             data.out_cop_active = False
             data.out_marker_cop_active = False
 
         # protected region user update end #
-        pass
+
 
     # protected region user additional functions begin #
 

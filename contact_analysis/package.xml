@@ -21,14 +21,18 @@
   <run_depend>visualization_msgs</run_depend>
   <build_depend>actionlib</build_depend>
   <run_depend>actionlib</run_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
   <build_depend>contact_msgs</build_depend>
   <run_depend>contact_msgs</run_depend>
+  <build_depend>contact_def</build_depend>
+  <run_depend>contact_def</run_depend>
   <build_depend>actionlib_msgs</build_depend>
   <run_depend>actionlib_msgs</run_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
 
   <!-- protected region additional package statements begin -->
+  <build_depend>contact_def</build_depend>
+  <run_depend>contact_def</run_depend>
   <!-- protected region additional package statements end -->
 
 </package>

@@ -20,6 +20,8 @@
             description="csv file containing wrench information to publish"/>
         <parameter name="inc" type="int" value="1"
             description="from the wrench measure, increment applied at each publication loop"/>
+        <parameter name="is_loop" type="bool" value="True"
+            description="Wether we loop over the data"/>
         <parameter name="slice_file" type="std::string" value="Undef"
             description="file containing a list of relevant slices"/>
         <parameter name="label_file" type="std::string" value="Undef"
@@ -38,8 +40,20 @@
             description="frequency at which we will to acquire cop"/>
         <parameter name="obs_duration" type="double" value="1.0"
             description="duration of the recording for learning or recognition (sec)"/>
+        <serviceServer name="load" type="contact_msgs::SetString"
+            description="To load a set of contact definition previously recorded"/>
+        <serviceServer name="store" type="contact_msgs::SetString"
+            description="To store a set of contact definition within a given directory"/>
+        <directPublisher name="plot_learn_contact" type="contact_msgs::PointArray"
+            description="set of cops used to define the latest contact"/>
+        <directPublisher name="plot_evaluate_contact" type="contact_msgs::PointArray"
+            description="Contact to be evaluated"/>
     </node>
 <depend>geometry_msgs</depend>
 <depend>visualization_msgs</depend>
 <depend>actionlib</depend>
+<depend>contact_msgs</depend>
+<depend>contact_def</depend>
+<depend>actionlib_msgs</depend>
+<depend>dynamic_reconfigure</depend>
 </package>

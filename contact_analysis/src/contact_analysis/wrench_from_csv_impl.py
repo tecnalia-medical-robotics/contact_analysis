@@ -16,6 +16,7 @@ from visualization_msgs.msg import MarkerArray
 # protected region user include package begin #
 import csv
 import numpy
+import sys
 from visualization_msgs.msg import Marker
 import simplejson
 # protected region user include package end #
@@ -28,6 +29,7 @@ class WrenchFromCsvConfig(object):
     def __init__(self):
         self.csv_file = "Undef"
         self.inc = 1
+        self.is_loop = True
         self.slice_file = "Undef"
         self.label_file = "Undef"
         pass
@@ -36,6 +38,7 @@ class WrenchFromCsvConfig(object):
         msg = "Instance of WrenchFromCsvConfig class: {"
         msg += "csv_file: {} ".format(self.csv_file)
         msg += "inc: {} ".format(self.inc)
+        msg += "is_loop: {} ".format(self.is_loop)
         msg += "slice_file: {} ".format(self.slice_file)
         msg += "label_file: {} ".format(self.label_file)
         msg += "}"
@@ -93,7 +96,7 @@ class WrenchFromCsvImplementation(object):
         self.id_wrench = -1
         self.marker = create_marker_text("ref", "map")
         self.slices = list()
-        self.label = dict()
+        self.labels = dict()
         # protected region user member variables end #
 
     def configure(self, config):
@@ -137,7 +140,7 @@ class WrenchFromCsvImplementation(object):
 
         rospy.loginfo("Loaded {} wrenches".format(len(self.wrenches)))
 
-        if config.slice_file != "undef":
+        if (config.slice_file != "undef") and (config.slice_file != "Undef"):
             rospy.loginfo("Loading slice file")
             try:
                 with open(config.slice_file) as f:
@@ -147,7 +150,7 @@ class WrenchFromCsvImplementation(object):
                 rospy.logerr("Error: {}".format(error))
                 self.slices = list()
 
-        if config.label_file != "undef":
+        if (config.label_file != "undef") and (config.label_file != "Undef"):
             rospy.loginfo("Loading label file")
             try:
                 with open(config.label_file) as f:
@@ -157,8 +160,9 @@ class WrenchFromCsvImplementation(object):
                 rospy.logerr("Error: {}".format(error))
                 self.labels = dict()
 
-        # protected region user configure end #
         return True
+        # protected region user configure end #
+
 
 
     def update(self, data, config):
@@ -175,10 +179,15 @@ class WrenchFromCsvImplementation(object):
         # rospy.loginfo("Check : inc is {} ".format(config.inc))
         self.id_wrench += config.inc
         if self.id_wrench >= len(self.wrenches):
-            rospy.loginfo("Published all wrenches, looping at next iteration")
-            self.id_wrench = - config.inc
-            data.out_wrench_active = False
-            return
+            if config.is_loop:
+                rospy.loginfo("Published all wrenches, looping at next iteration")
+                self.id_wrench = - config.inc
+                data.out_wrench_active = False
+                return
+            else:
+                rospy.logwarn("Quitting the node")
+                #todo: this is not satisfactory...
+                sys.exit()
         wrench = self.wrenches[self.id_wrench]
         wrench.header.stamp = rospy.get_rostime()
         data.out_wrench = wrench
@@ -193,7 +202,7 @@ class WrenchFromCsvImplementation(object):
         self.marker.text = "data {} {}".format(self.id_wrench, label)
         data.out_data_info.markers = [self.marker]
         # protected region user update end #
-        pass
+
 
     # protected region user additional functions begin #
 def create_marker_text(ns='debug', frame_id='map'):

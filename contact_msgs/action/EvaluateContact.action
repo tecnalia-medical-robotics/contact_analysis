@@ -14,8 +14,10 @@ bool is_good
 float32 confidence
 # label of the most probable blob
 string blob_label
-# id of the modt probable blob
+# id of the most probable blob
 int32 blob_id
+# additional message
+string message
 ---
 # feedback
 # number of sample currently accumulated

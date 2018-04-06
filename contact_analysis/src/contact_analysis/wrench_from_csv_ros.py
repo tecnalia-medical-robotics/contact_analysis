@@ -44,6 +44,7 @@ class WrenchFromCsvROS(object):
         """
         self.component_config_.csv_file = config.csv_file
         self.component_config_.inc = config.inc
+        self.component_config_.is_loop = config.is_loop
         self.component_config_.slice_file = config.slice_file
         self.component_config_.label_file = config.label_file
         return config
@@ -62,7 +63,7 @@ class WrenchFromCsvROS(object):
         self.component_data_.out_data_info_active = True
         pass
 
-    def set_all_output_read(self):
+    def set_all_input_read(self):
         """
         set related flag to state that input has been read
         """
@@ -80,7 +81,7 @@ class WrenchFromCsvROS(object):
         self.activate_all_output()
         config = deepcopy(self.component_config_)
         data = deepcopy(self.component_data_)
-        self.set_all_output_read()
+        self.set_all_input_read()
         self.component_implementation_.update(data, config)
 
         try:

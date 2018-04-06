@@ -11,11 +11,18 @@ https://www.gnu.org/licenses/gpl.txt
 
 import rospy
 from geometry_msgs.msg import Point
+from contact_msgs.msg import PointArray
+from contact_msgs.msg import PointArray
+from contact_msgs.srv import SetString, SetStringResponse
+from contact_msgs.srv import SetString, SetStringResponse
 from contact_msgs.msg import LearnContactFeedback, LearnContactResult
 from contact_msgs.msg import EvaluateContactFeedback, EvaluateContactResult
 
 # protected region user include package begin #
 from copy import deepcopy
+from contact_def.ar_contact_set import ContactForceSet
+from contact_def.ar_contact_class import ContactForce
+import numpy
 # protected region user include package end #
 
 class ContactEvaluateConfig(object):
@@ -66,6 +73,8 @@ class ContactEvaluatePassthrough(object):
         """
         self.as_learn = None
         self.as_evaluate = None
+        self.pub_plot_learn_contact = None
+        self.pub_plot_evaluate_contact = None
         pass
 
 class ContactEvaluateImplementation(object):
@@ -83,6 +92,9 @@ class ContactEvaluateImplementation(object):
         self.active_action = None
         # last cop received
         self.last_cop = None
+
+        # handler for contact description
+        self.contact_set = ContactForceSet()
         # protected region user member variables end #
 
     def configure(self, config):
@@ -100,8 +112,9 @@ class ContactEvaluateImplementation(object):
 
         self.config = deepcopy(config)
         self.active_action = None
-        # protected region user configure end #
         return True
+        # protected region user configure end #
+
 
 
     def update(self, data, config):
@@ -119,7 +132,38 @@ class ContactEvaluateImplementation(object):
         if data.in_cop_updated:
             self.last_cop = deepcopy(data.in_cop)
         # protected region user update end #
-        pass
+
+
+    def callback_load(self, req):
+        """
+        @brief callback of service load
+
+        @param self The object
+        @param req(SetString) input parameter
+
+        @return (SetStringResponse) service output
+        """
+        result = SetStringResponse()
+        # protected region user implementation of service callback for load begin #
+        result.success = self.load_set(req.message)
+        # protected region user implementation of service callback for load end #
+        return result
+
+    def callback_store(self, req):
+        """
+        @brief callback of service store
+
+        @param self The object
+        @param req(SetString) input parameter
+
+        @return (SetStringResponse) service output
+        """
+        result = SetStringResponse()
+        # protected region user implementation of service callback for store begin #
+        rospy.loginfo("Storing models...")
+        result.success = self.store_set(req.message)
+        # protected region user implementation of service callback for store end #
+        return result
 
     def callback_learn(self, goal):
         """
@@ -132,23 +176,9 @@ class ContactEvaluateImplementation(object):
         @warning may send some feedback during the task execution
         """
 
-        # to provide feedback during action execution
-        # to send the feedback, one should use:
-        # self.passthrough.as_learn.publish_feedback(feedback)
-        feedback = LearnContactFeedback()
-        # to contain the outcome of the task at completion
-        # to send the result, one should use:
-        # on suceess:
-        # self.passthrough.as_learn.set_succeeded(result)
-        result = LearnContactResult()
-        # Remind that preemption request should be checked during action execution:
-        # if self.passthrough.as_learn.is_preempt_requested():
-        #        rospy.loginfo('Preempted action learn')
-        #        self.passthrough.as_learn.set_preempted()
-        #        success = False
-        #        break
-
         # protected region user implementation of action callback for learn begin #
+        feedback = LearnContactFeedback()
+        result = LearnContactResult()
         rospy.loginfo("Received goal: {}".format(goal))
 
         if goal.frequency == 0:
@@ -169,10 +199,12 @@ class ContactEvaluateImplementation(object):
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_learn.is_preempt_requested():
-               rospy.loginfo('%s: Preempted action as_learn')
-               self.passthrough.as_learn.set_preempted()
-               break
+                rospy.loginfo('%s: Preempted action as_learn')
+                self.passthrough.as_learn.set_preempted()
+                break
 
+            # rospy.loginfo("Adding cop {}: {}".format(len(cops), self.last_cop))
+            # cops.append([self.last_cop.x, self.last_cop.y])
             cops.append(self.last_cop)
             feedback.sample_number += 1
             self.passthrough.as_learn.publish_feedback(feedback)
@@ -180,6 +212,26 @@ class ContactEvaluateImplementation(object):
 
         result.success = True
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
+
+        # initializing a cop definition from the reading
+        contact = ContactForce(goal.contact_label, goal.is_good_contact)
+        cop_list = [[p.x, p.y] for p in cops]
+        cops_array = numpy.asarray(cop_list)
+
+        point_array = PointArray()
+        point_array.points = cops
+        self.passthrough.pub_plot_learn_contact.publish(point_array)
+        # rospy.loginfo("cop_array shape: {}".format(cops_array.shape))
+
+        if not contact.set_cops(cops_array):
+            rospy.logerr("Prb while initialising the contact from list")
+            result.success = False
+        # if ok, we characterize the set and add it to the list
+        if not contact.characterize():
+            rospy.logerr("Prb while characterizing the contact")
+            result.success = False
+        self.contact_set.contacts.append(contact)
+
         self.passthrough.as_learn.set_succeeded(result)
         # protected region user implementation of action callback for learn end #
 
@@ -194,25 +246,17 @@ class ContactEvaluateImplementation(object):
         @warning may send some feedback during the task execution
         """
 
-        # to provide feedback during action execution
-        # to send the feedback, one should use:
-        # self.passthrough.as_evaluate.publish_feedback(feedback)
-        feedback = EvaluateContactFeedback()
-        # to contain the outcome of the task at completion
-        # to send the result, one should use:
-        # on suceess:
-        # self.passthrough.as_evaluate.set_succeeded(result)
-        result = EvaluateContactResult()
-        # Remind that preemption request should be checked during action execution:
-        # if self.passthrough.as_evaluate.is_preempt_requested():
-        #        rospy.loginfo('Preempted action evaluate')
-        #        self.passthrough.as_evaluate.set_preempted()
-        #        success = False
-        #        break
-
         # protected region user implementation of action callback for evaluate begin #
-
+        feedback = EvaluateContactFeedback()
+        result = EvaluateContactResult()
         rospy.loginfo("Received goal: {}".format(goal))
+
+        if not self.contact_set.contacts:
+            result.message = "No contact defined"
+            rospy.logerr("No contact defined")
+            result.success = False
+            self.passthrough.as_evaluate.set_succeeded(result)
+            return
 
         if goal.frequency == 0:
             rospy.logwarn("Frequency unset. Forced to {}".format(self.config.frequency))
@@ -232,21 +276,56 @@ class ContactEvaluateImplementation(object):
         for _ in xrange(iteration):
             # check that preempt has not been requested by the client
             if self.passthrough.as_evaluate.is_preempt_requested():
-               rospy.loginfo('%s: Preempted action as_evaluate')
-               self.passthrough.as_evaluate.set_preempted()
-               break
+                rospy.loginfo('%s: Preempted action as_evaluate')
+                self.passthrough.as_evaluate.set_preempted()
+                break
 
             cops.append(self.last_cop)
+
             feedback.sample_number += 1
             self.passthrough.as_evaluate.publish_feedback(feedback)
             rate.sleep()
 
+        rospy.loginfo("{} cops stored".format(feedback.sample_number))
+
+        # initializing a cop definition from the reading
+        contact = ContactForce()
+        cop_list = [[p.x, p.y] for p in cops]
+        cops_array = numpy.asarray(cop_list)
+
+        point_array = PointArray()
+        point_array.points = cops
+        self.passthrough.pub_plot_evaluate_contact.publish(point_array)
+
         result.success = True
         result.is_good = True
         result.confidence = 1.0
-        rospy.loginfo("{} cops stored".format(feedback.sample_number))
+
+        result.is_good, result.confidence, result.blob_id, result.message = self.contact_set.evaluate(cops_array)
+        result.blob_label = self.contact_set.contacts[result.blob_id].name_
+
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
 
     # protected region user additional functions begin #
+
+    def load_set(self, cfg_file):
+        """
+        @brief Loads a set of contact from the data in the configuration file.
+        @param      self The object
+        @param      cfg_file The configuration file
+
+        @return True on success
+        """
+        return self.contact_set.load_contacts(cfg_file)
+
+    def store_set(self, dir_name):
+        """
+        @brief store the contact set
+        @param      self The object
+        @param      dir_name directory into which data is to be stored
+
+        @return True on success
+        """
+        return self.contact_set.store_contacts(dir_name)
     # protected region user additional functions end #

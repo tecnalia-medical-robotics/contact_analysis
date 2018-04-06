@@ -1,0 +1,4 @@
+string message # string to be transmitted (directory for storing or directory to load)
+---
+bool success   # indicate successful run of triggered service
+string message # informational, e.g. for error messages
