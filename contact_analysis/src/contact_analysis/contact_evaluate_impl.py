@@ -251,6 +251,13 @@ class ContactEvaluateImplementation(object):
         result = EvaluateContactResult()
         rospy.loginfo("Received goal: {}".format(goal))
 
+        if not self.contact_set.contacts:
+            result.message = "No contact defined"
+            rospy.logerr("No contact defined")
+            result.success = False
+            self.passthrough.as_evaluate.set_succeeded(result)
+            return
+
         if goal.frequency == 0:
             rospy.logwarn("Frequency unset. Forced to {}".format(self.config.frequency))
             goal.frequency = self.config.frequency
@@ -280,9 +287,9 @@ class ContactEvaluateImplementation(object):
             rate.sleep()
 
         rospy.loginfo("{} cops stored".format(feedback.sample_number))
-        
+
         # initializing a cop definition from the reading
-        contact = ContactForce(goal.contact_label, goal.is_good_contact)
+        contact = ContactForce()
         cop_list = [[p.x, p.y] for p in cops]
         cops_array = numpy.asarray(cop_list)
 
@@ -295,8 +302,9 @@ class ContactEvaluateImplementation(object):
         result.is_good = True
         result.confidence = 1.0
 
-        result.is_good, result.confidence = self.contact_set.evaluate(cops_array)
-        
+        result.is_good, result.confidence, result.blob_id, result.message = self.contact_set.evaluate(cops_array)
+        result.blob_label = self.contact_set.contacts[result.blob_id].name_
+
         self.passthrough.as_evaluate.set_succeeded(result)
         # protected region user implementation of action callback for evaluate end #
 

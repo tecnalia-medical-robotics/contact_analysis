@@ -73,6 +73,7 @@ class AnimatedContact(object):
         # tbd loop function param
         self.lines = None
         # to be completed
+        #plt.style.use('ggplot')
 
     def srv_load_callback(self, req):
         result = SetStringResponse()
@@ -106,7 +107,7 @@ class AnimatedContact(object):
 
         # initializa interaction tools
 
-        self.input, = self.ax.plot([0.1], [-0.2], 'o', color='b')
+        self.input, = self.ax.plot([0], [0], 'o', color='b')
         self.learn_cop, = self.ax.plot([],[], '.')
         self.ellipse_learn = Ellipse([0,0], 0, 0, 0)
         self.evaluate_cop, = self.ax.plot([],[], '.')

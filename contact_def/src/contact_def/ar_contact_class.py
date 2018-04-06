@@ -12,7 +12,7 @@ import math
 import yaml
 import pickle
 from scipy import stats
-from ar_basic_class import BasicClass
+from contact_def.ar_basic_class import BasicClass
 
 class ContactForce(BasicClass):
     """
@@ -250,12 +250,30 @@ class ContactForce(BasicClass):
 
         aligned_pt = numpy.dot(pt,  self.sing_vectors_)
 
-
         sigma_pt = aligned_pt / self.sigma_
 
         distance = numpy.linalg.norm(sigma_pt)
 
         return distance
+
+    def check_shape(self):
+        """
+        Check the shape of the contact
+        """
+
+        # Look at the ratio between the two sigma
+        #assert self.sigma_ is not None
+
+        ratio = self.sigma_[0] / self.sigma_[1]
+        self.log("sigma: [{:.03} {:.03}] ratio: {}".format(self.sigma_[0], self.sigma_[1], ratio))
+
+        if ratio >= 9:
+            ratio_type = "Line"
+        else:
+            ratio_type = "Point"
+
+        self.log_warn(ratio_type)
+        return ratio_type
 
 
     def store_data_yaml(self, filename):
