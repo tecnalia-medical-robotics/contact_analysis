@@ -163,6 +163,32 @@ class AnimatedContact(object):
         self.ellipse_learn.set_alpha(0.4)
         self.learn_cop.set_data(cop_array[:, 0], cop_array[:, 1])
 
+    def topic_callback_evaluate(self, msg):
+        """
+        @brief ros callback on message
+        @param self the object
+        @param msg received message [geometry_msgs/Point]
+        """
+        rospy.loginfo("Received {} cops".format(len(msg.points)))
+
+        cops = [[p.x, p.y] for p in msg.points]
+        cop_array = numpy.asarray(cops)
+
+        contact = ContactForce("evaluate cop", True)
+        if not contact.set_cops(cop_array):
+            rospy.logerr("Prb while initializing the contact")
+        if not contact.characterize():
+            rospy.logerr("Prb while characterizing the contact")
+
+        [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
+
+        self.ellipse_eval.center = cop_mean
+        self.ellipse_eval.width = major_axis
+        self.ellipse_eval.height = minor_axis
+        self.ellipse_eval.angle = angle
+        self.ellipse_eval.set_alpha(0.4)
+        self.evaluate_cop.set_data(cop_array[:, 0], cop_array[:, 1])
+
     def animation_loop(self, num):
         """
         @brief looping function automatically called by the animation process
@@ -220,6 +246,7 @@ class AnimatedContact(object):
 
         self.sub_cop = rospy.Subscriber('cop', Point, self.topic_callback_cop)
         self.sub_learn = rospy.Subscriber('plot_learn_contact', PointArray, self.topic_callback_learn)
+        self.sub_eval = rospy.Subscriber('plot_evaluate_contact', PointArray, self.topic_callback_evaluate)
 
         while True:
             if rospy.is_shutdown():

@@ -297,7 +297,6 @@ class ContactEvaluateImplementation(object):
         point_array.points = cops
         self.passthrough.pub_plot_evaluate_contact.publish(point_array)
 
-
         result.success = True
         result.is_good = True
         result.confidence = 1.0
