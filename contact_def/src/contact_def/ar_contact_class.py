@@ -156,7 +156,7 @@ class ContactForce(BasicClass):
         self.log("cop_mean: {}".format(cop_mean))
         cop_m = self.cop_ - cop_mean
 
-        self.log("data shape: {}".format(cop_m.shape))
+        # self.log("data shape: {}".format(cop_m.shape))
 
         U, sing_values, VT = numpy.linalg.svd(cop_m, full_matrices=False)
         V = VT.T
@@ -167,7 +167,7 @@ class ContactForce(BasicClass):
         # projecting point into the space spanned by the eigenvectors
         # to get the distribution on the axes
         projected_cop = numpy.dot(cop_m, V)
-        self.log("projected_cop shape: {}".format(projected_cop.shape))
+        # self.log("projected_cop shape: {}".format(projected_cop.shape))
 
         sigma = projected_cop.std(axis=0)
         self.log("sigma is: {}".format(sigma))
@@ -238,7 +238,7 @@ class ContactForce(BasicClass):
         y {float} -- 2nd coordinate
 
         Returns:
-            [float] -- Computed distance, -a on error
+            [float] -- Computed distance, -1 on error
         """
 
         if self.cop_mean_ is None:
@@ -255,6 +255,59 @@ class ContactForce(BasicClass):
         distance = numpy.linalg.norm(sigma_pt)
 
         return distance
+
+    def is_pt_in_bbox(self, x, y , within=.90, tolerance=0):
+        """
+        @brief check wether a point is within the contact definition area
+        @param self the object
+        @param x x coordinates of the request point
+        @param y y coordinates of the request point
+        @param within % of data to be represented by the ellipse
+        @warning the ellipse is approximated by a bbox
+        """
+
+        if self.cop_mean_ is None:
+            return False
+        if self.sigma_ is None:
+            return False
+
+        pt = numpy.array([x, y]) - self.cop_mean_
+        aligned_pt = numpy.dot(pt,  self.sing_vectors_)
+
+        # todo: check the ellipse size: we may have to use half of it.
+        _, _, _, max_axis, min_axis = self.get_ellipse(within)
+
+        x_b = max_axis / 2.0 + tolerance
+        y_b = min_axis / 2.0 + tolerance
+
+        print "pt projected: {}".format(aligned_pt)
+        print "From [{}, {}] we generate [{}, {}]".format(self.sigma_[0],
+                                                          self.sigma_[1],
+                                                          x_b, y_b)
+
+        is_in = (-x_b < aligned_pt[0] < x_b) and (-y_b < aligned_pt[1] < y_b)
+
+        return  is_in
+
+    def dist_to_bbox(self, x, y , within=.90, tolerance=0):
+
+        if self.cop_mean_ is None:
+            return False
+        if self.sigma_ is None:
+            return False
+
+        pt = numpy.array([x, y]) - self.cop_mean_
+        aligned_pt = numpy.dot(pt,  self.sing_vectors_)
+
+        # todo: check the ellipse size: we may have to use half of it.
+        _, _, _, max_axis, min_axis = self.get_ellipse(within)
+
+        x_b = max_axis / 2.0 + tolerance
+        y_b = min_axis / 2.0 + tolerance
+
+        dx = max(abs(aligned_pt[0]) - x_b, 0.0)
+        dy = max(abs(aligned_pt[1]) - y_b, 0.0)
+        return dx * dx + dy * dy
 
     def check_shape(self):
         """

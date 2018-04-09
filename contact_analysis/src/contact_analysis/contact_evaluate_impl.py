@@ -301,7 +301,7 @@ class ContactEvaluateImplementation(object):
         result.is_good = True
         result.confidence = 1.0
 
-        result.is_good, result.confidence, result.blob_id, result.message = self.contact_set.evaluate(cops_array)
+        result.is_good, result.confidence, result.blob_id, result.message = self.contact_set.full_evaluate(cops_array)
         result.blob_label = self.contact_set.contacts[result.blob_id].name_
 
         self.passthrough.as_evaluate.set_succeeded(result)

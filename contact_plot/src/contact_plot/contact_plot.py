@@ -27,23 +27,49 @@ from contact_msgs.msg import PointArray
 # https://matplotlib.org/users/event_handling.html
 # use to display a point, and display it around
 class EnhancedGraph(object):
-    def __init__(self, line, text):
+    """
+    @brief used to plot the location of the cursor and other info related to that position
+    """
+    def __init__(self, line, text, contacts):
+        """
+        @brief constructor
+        @param line the plot object related to the cursor position
+        @param text the plot object to which we write information
+        """
         self.line = line
         self.text = text
+        self.contacts = contacts
 
         self.cid = line.figure.canvas.mpl_connect('motion_notify_event', self)
+        self.bid = line.figure.canvas.mpl_connect('button_press_event', self.button_press_callback)
 
     def __call__(self, event):
+        """
+        @brief called when the cursor is in the image
+        @param event to be defined.
+        """
         # print('click', event)
         if event.inaxes != self.line.axes:
             return
 
         msg = 'pt: [{:.3}, {:.3}]'.format(event.xdata, event.ydata)
-        # print msg
+
         self.text.set_text(msg)
         self.line.set_data(event.xdata, event.ydata)
-        #self.line.figure.canvas.draw()
+        # this is the standard approach, but it generates lags with animation config
+        # self.line.figure.canvas.draw()
 
+    def button_press_callback(self, event):
+        if event.inaxes != self.line.axes:
+            return
+
+        msg = 'pt: [{:.3}, {:.3}]'.format(event.xdata, event.ydata)
+
+        mess = self.contacts.check_bbox(event.xdata, event.ydata)
+        msg += " {}".format(mess)
+
+        self.text.set_text(msg)
+        self.line.set_data(event.xdata, event.ydata)
 
 class AnimatedContact(object):
 
@@ -122,7 +148,7 @@ class AnimatedContact(object):
         self.text_cursor = self.ax.text(0.05, 0.05, 'cb : none',
                                         transform=self.ax.transAxes, va='top')
 
-        self.enhanced_graph = EnhancedGraph(self.cursor, self.text_cursor)
+        self.enhanced_graph = EnhancedGraph(self.cursor, self.text_cursor, self.contact_set)
 
         self.lines = [self.input, self.cursor, self.text_cursor,
                       self.text_cb, self.learn_cop, self.ellipse_learn,

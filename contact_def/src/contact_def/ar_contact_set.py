@@ -151,19 +151,16 @@ class ContactForceSet(BasicClass):
         return True
 
     def euclidean_order(self, x, y):
+        # todo why just providing the 3 best?
+        # Should class more and let the user select how many it wants 
 
         distances = [contact.mean_distance(x, y) for contact in self.contacts]
 
         index_ordered = numpy.argsort(distances)
-        self.log("distances: {}".format(distances))
-        self.log("index: {}".format(index_ordered))
+        # self.log("distances: {}".format(distances))
+        # self.log("index: {}".format(index_ordered))
 
-        # select the best 3
-        best = list()
-
-        for i in range(3):
-            idx = index_ordered[i]
-            best.append([idx, distances[idx]])
+        best = [[idx, distances[idx]] for idx in index_ordered]
         return best
 
     def sigma_order(self, x, y):
@@ -174,12 +171,7 @@ class ContactForceSet(BasicClass):
         self.log("distances: {}".format(distances))
         self.log("index: {}".format(index_ordered))
 
-        # select the best 3
-        best = list()
-
-        for i in range(3):
-            idx = index_ordered[i]
-            best.append([idx, distances[idx]])
+        best = [[idx, distances[idx]] for idx in index_ordered]
         return best
 
     def evaluate(self, lcops):
@@ -231,6 +223,101 @@ class ContactForceSet(BasicClass):
         return is_good, confidence, idx_best, message
 
 
+    def full_evaluate(self, lcops):
+         # define a Contact Force from the data
+        request = ContactForce()
+        request.cop_ = lcops
+        request.characterize()
+        req_type = request.check_shape()
+        self.log("request type: {}".format(req_type))
+
+        center = request.cop_mean_
+
+        return self.check_bbox(center[0], center[1])
+
+
+    def bbx_order(self, x, y, within=.9, tolerance=0):
+        """
+        @brief check wether the point is within the bouding box of one of the learned contacts
+        @param x x coordinite of the point of interest
+        @param z y coordinate of the point of interest
+        @param within % of the confidence ellipse to consider
+        @return list of best candidate idx with score.
+        """
+
+        dist_rec = [contact.dist_to_bbox(x, y, within, tolerance) for contact in self.contacts]
+
+        to_print = ["{:.3}".format(item) for item in dist_rec]
+        self.log("Is in score: {}".format(to_print))
+
+        sig_order = self.euclidean_order(x, y)
+
+        # formula to check
+        best = [item for item in sig_order if dist_rec[item[0]] == 0]
+
+        self.log("Best: {}".format(best))
+        return best
+
+    def check_bbox(self, x, y):
+
+        self.log("bbx check")
+        bbest = self.bbx_order(x, y)
+
+        if bbest:
+            confidence = 1.0
+            idx_best = bbest[0][0]
+            is_good = self.contacts[idx_best].is_good_contact_
+            message = "center in bbox"
+            return is_good, confidence, idx_best, message
+
+        self.log("bbx check + 0.005")
+        bbest = self.bbx_order(x, y, tolerance=0.005)
+
+        if bbest:
+            confidence = 0.8
+            idx_best = bbest[0][0]
+            is_good = self.contacts[idx_best].is_good_contact_
+            message = "center in bbox + 0.005"
+            return is_good, confidence, idx_best, message
+
+        self.log("bbx check + 0.01")
+        bbest = self.bbx_order(x, y, tolerance=0.01)
+
+        if bbest:
+            confidence = 0.5
+            idx_best = bbest[0][0]
+            is_good = self.contacts[idx_best].is_good_contact_
+            message = "center in bbox + 0.01"
+            return is_good, confidence, idx_best, message
+
+        self.log_warn("No good contact")
+
+        confidence = 0.6
+        idx_best = -1
+        is_good = False
+        message = "Too far"
+        return is_good, confidence, idx_best, message
+
+    def evaluate_bbox(self, lcops):
+
+        request = ContactForce()
+        request.cop_ = lcops
+        request.characterize()
+        req_type = request.check_shape()
+        self.log("request type: {}".format(req_type))
+        self.log("Check per distance")
+        center = request.cop_mean_
+
+        bbest = self.bbx_order(center[0], center[1])
+
+        self.log("Obtained in bbx:")
+        for item in bbest:
+            self.log("Score [{}]: [{}]".format(item[0], item [1]))
+
+        #for i in range(3):
+        #    self.log_error("Score [{}]: []".format(bbest[i][0], bbest[i][1]))
+
+
     def get_graph(self):
         """
         @brief generate the graph of the contacts
@@ -252,7 +339,7 @@ class ContactForceSet(BasicClass):
                 cop = contact.cop_
                 if len(cop) > 0:
                     #ax_glob.plot(cop[:, 0], cop[:, 1], 'o', color=colors(i), label="{}-{}".format(i + 1, labels[i + 1]))
-                    ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="{}".format(contact.name_))
+                    ax_glob.plot(cop[:, 0], cop[:, 1], '.', color=colors(i), label="({}) {}".format(i, contact.name_))
 
                     [cop_mean, sigma, angle, major_axis, minor_axis] = contact.get_ellipse()
 
@@ -272,8 +359,8 @@ class ContactForceSet(BasicClass):
         # patches = [ mpatches.Patch(color=colors[i], label="{:s}".format(labels[relevant_slices[i][0]]) ) for i in range(len(relevant_slices)) ]
         # plt.legend(handles=patches, ncol=2 )
 
-        ax_glob.set_xlabel("x[mm]")
-        ax_glob.set_ylabel("y[mm]")
+        ax_glob.set_xlabel("x[m]")
+        ax_glob.set_ylabel("y[m]")
         ax_glob.grid()
 
         if self.contacts:
@@ -284,7 +371,7 @@ class ContactForceSet(BasicClass):
             ax_glob.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
             # Put a legend to the right of the current axis
-            ax_glob.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+            ax_glob.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1)
 
         return fig_glob, ax_glob
 
