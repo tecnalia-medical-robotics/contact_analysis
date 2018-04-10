@@ -152,7 +152,7 @@ class ContactForceSet(BasicClass):
 
     def euclidean_order(self, x, y):
         # todo why just providing the 3 best?
-        # Should class more and let the user select how many it wants 
+        # Should class more and let the user select how many it wants
 
         distances = [contact.mean_distance(x, y) for contact in self.contacts]
 

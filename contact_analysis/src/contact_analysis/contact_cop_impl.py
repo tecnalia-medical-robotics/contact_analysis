@@ -141,8 +141,8 @@ class ContactCopImplementation(object):
         #rospy.logerr("th: {}".format(config.force_th))
         if force_norm > config.force_th and force[2] != 0:
             rospy.loginfo("Norm: {}".format(force_norm))
-            data.out_cop.x = - (torque[1] + 0.005* force[0]) / force[2]
-            data.out_cop.y = (torque[0] + 0.005* force[1]) / force[2]
+            data.out_cop.x = - (torque[1] + 0.005*force[0]) / force[2]
+            data.out_cop.y = (torque[0] - 0.005*force[1]) / force[2]
             data.out_cop.z = 0.0
 
             self.marker.points = list()
